@@ -1,4 +1,3 @@
-
 <p align="center">
   <img alt="573in1 logo" src="doc/assets/logo.png" width="512" />
 </p>
