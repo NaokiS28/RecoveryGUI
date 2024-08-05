@@ -45,6 +45,8 @@ add_executable(
 	src/common/gpu.cpp
 	src/common/gpufont.cpp
 	src/main/app/app.cpp
+	src/main/app/mainmenu.cpp
+	src/main/app/modals.cpp
 	src/main/main.cpp
 	src/main/uibase.cpp
 	src/main/uicommon.cpp

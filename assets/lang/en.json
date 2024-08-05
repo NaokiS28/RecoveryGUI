@@ -1,52 +1,55 @@
 {
+	"MessageScreen": {
+		"title": {
+			"success": "Success",
+			"warning": "Warning",
+			"error":   "Error"
+		},
+
+		"ok": "Continue"
+	},
+
+	"ConfirmScreen": {
+		"title": "Confirm operation",
+		"no":    "No, go back",
+		"yes":   "Yes, continue"
+	},
+
+	"FileBrowserScreen": {
+		"title":      "▸ Select file",
+		"itemPrompt": "▸ Press ▭ to select, hold ◁▷ + ▭ to go back",
+
+		"parentDir":   "[Parent directory]",
+		"subdirError": "An error occurred while enumerating files in the selected subdirectory. The filesystem may be corrupted or otherwise inaccessible.\n\nPath: %s\nPress the Test button to view debug logs."
+	},
+
+	"FilePickerScreen": {
+		"title":      "▸ Select drive",
+		"itemPrompt": "▸ Press ▭ to select, hold ◁▷ + ▭ to go back",
+
+		"host": "🔌 Host filesystem",
+		"noFS": "no disc or unsupported FS",
+
+		"noFilesError": "No files or directories have been found in the root of the selected drive's filesystem."
+	},
+
 	"MainMenuScreen": {
-		"title":      "▸ 573in1",
+		"title":      "▸ Main menu",
 		"itemPrompt": "▸ Use ◁▷ to move, select by pressing ▭",
 
-		"cartInfo": {
-			"name":   "Manage security cartridge",
-			"prompt": "Display information about, unlock, dump and manipulate the contents of the inserted security cartridge (if any)."
+		"entry1": {
+			"name":   "Entry 1",
+			"prompt": "Example menu entry (1)."
 		},
-		"storageInfo": {
-			"name":   "Manage flash, PCMCIA cards, RTC and BIOS ROM",
-			"prompt": "Display information about, dump and manipulate the contents of the system's built-in storage devices or any inserted PCMCIA flash cards."
+		"entry2": {
+			"name":   "Entry 2",
+			"prompt": "Example menu entry (2)."
 		},
-		"ideInfo": {
-			"name":   "View IDE device and filesystem information",
-			"prompt": "Display information about the connected IDE/ATAPI devices and mounted FAT and ISO9660 filesystems (if any)."
+		"entry3": {
+			"name":   "Entry 3",
+			"prompt": "Example menu entry (3)."
 		},
-		"runExecutable": {
-			"name":       "Run executable from CD-ROM or hard drive",
-			"prompt":     "Load and launch a System 573 executable from the CD-ROM, IDE hard drive or CF card (if connected).",
-			"filePrompt": "Note that PlayStation executables built without proper System 573 support will not run unless the watchdog is manually disabled."
-		},
-		"setRTCTime": {
-			"name":   "Set RTC date and time",
-			"prompt": "Adjust the current date and time. Note that the time will not persist after a power cycle if the RTC's internal battery is empty."
-		},
-		"testMenu": {
-			"name":   "Hardware test suite",
-			"prompt": "Display monitor test patterns, check if all inputs are functional or test the system and cabinet's hardware."
-		},
-		"setLanguage": {
-			"name":   "Change language",
-			"prompt": "Switch to a different language."
-		},
-		"setResolution": {
-			"name":   "Change screen resolution",
-			"prompt": "Switch to a different screen resolution and aspect ratio. Some monitors and upscalers may not support all resolutions."
-		},
-		"about": {
-			"name":   "About 573in1",
-			"prompt": "View information about this tool, including open source licenses."
-		},
-		"ejectCD": {
-			"name":   "Eject CD-ROM",
-			"prompt": "Open the CD-ROM drive's tray. You may use this option if the drive's eject button is not easily accessible on your 573."
-		},
-		"reboot": {
-			"name":   "Reboot system",
-			"prompt": "Restart the system. Turn on DIP switch 4 before selecting this option to reboot into the game installed on the internal flash memory (if any)."
-		}
+
+		"entryMessage": "Entry %d has been selected."
 	}
 }

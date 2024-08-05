@@ -178,6 +178,7 @@ void App::_updateOverlays(void) {
 	_ctx.overlays[1]    = &_logOverlay;
 #endif
 
+	_ctx.show(_mainMenuScreen);
 	_splashOverlay.show(_ctx);
 	//_ctx.sounds[ui::SOUND_STARTUP].play();
 

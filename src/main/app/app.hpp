@@ -22,7 +22,9 @@
 #include "common/file/zip.hpp"
 #include "common/util/log.hpp"
 #include "common/util/templates.hpp"
+#include "main/app/mainmenu.hpp"
 #include "main/uibase.hpp"
+#include "modals.hpp"
 
 /* Filesystem manager class */
 
@@ -50,7 +52,23 @@ public:
 /* App class */
 
 class App {
+	friend class MainMenuScreen;
+
+	friend class MessageScreen;
+	friend class ConfirmScreen;
+	friend class FilePickerScreen;
+	friend class FileBrowserScreen;
+
 private:
+	// mainmenu.cpp
+	MainMenuScreen _mainMenuScreen;
+
+	// modals.cpp
+	MessageScreen     _messageScreen;
+	ConfirmScreen     _confirmScreen;
+	FilePickerScreen  _filePickerScreen;
+	FileBrowserScreen _fileBrowserScreen;
+
 	ui::TiledBackground   _background;
 	ui::TextOverlay       _textOverlay;
 	ui::SplashOverlay     _splashOverlay;
