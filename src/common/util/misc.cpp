@@ -17,10 +17,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 #include "common/util/hash.hpp"
 #include "common/util/misc.hpp"
 #include "common/util/templates.hpp"
-#include "ps1/system.h"
 
 namespace util {
 
@@ -114,98 +114,18 @@ size_t Date::toString(char *output) const {
 	);
 }
 
-/* PS1 executable loader */
+void Date::fromCurrentTime(void) {
+	auto timeValue = time(nullptr);
+	tm   timeObj;
 
-bool ExecutableHeader::validateMagic(void) const {
-#if 0
-	return (
-		hash(magic, sizeof(magic)) ==
-		hash("PS-X EXE\0\0\0\0\0\0\0\0", sizeof(magic), 0)
-	);
-#else
-	return true
-		&& (magic[0] == concatenate('P', 'S', '-', 'X'))
-		&& (magic[1] == concatenate(' ', 'E', 'X', 'E'))
-		&& !magic[2]
-		&& !magic[3]
-		&& !(entryPoint % 4)
-		&& !(textOffset % 4)
-		&& !(textLength % 2048)
-		&& !dataLength
-		&& !bssLength;
-#endif
-}
+	localtime_s(&timeObj, &timeValue);
 
-ExecutableLoader::ExecutableLoader(
-	void *entryPoint, void *initialGP, void *stackTop
-) : _entryPoint(entryPoint), _initialGP(initialGP), _numArgs(0) {
-	_argListPtr      = reinterpret_cast<const char **>(uintptr_t(stackTop) & ~7)
-		- MAX_EXECUTABLE_ARGS;
-	_currentStackPtr = reinterpret_cast<char *>(_argListPtr);
-}
-
-bool ExecutableLoader::addArgument(const char *arg) {
-	if (_numArgs >= MAX_EXECUTABLE_ARGS)
-		return false;
-
-	_argListPtr[_numArgs++] = arg;
-	return true;
-}
-
-bool ExecutableLoader::copyArgument(const char *arg, size_t length) {
-	if (_numArgs >= MAX_EXECUTABLE_ARGS)
-		return false;
-
-	// Command-line arguments must be copied to the top of the new stack in
-	// order to ensure the executable is going to be able to access them at any
-	// time.
-	*(--_currentStackPtr) = 0;
-	_currentStackPtr     -= length;
-	__builtin_memcpy(_currentStackPtr, arg, length);
-
-	_argListPtr[_numArgs++] = _currentStackPtr;
-	return true;
-}
-
-bool ExecutableLoader::formatArgument(const char *format, ...) {
-	char    buffer[64];
-	va_list ap;
-
-	va_start(ap, format);
-	int length = vsnprintf(buffer, sizeof(buffer), format, ap);
-	va_end(ap);
-
-	return copyArgument(buffer, length + 1);
-}
-
-[[noreturn]] void ExecutableLoader::run(
-	int rawArgc, const char *const *rawArgv
-) {
-#if 0
-	disableInterrupts();
-	flushCache();
-#endif
-
-	register int               a0  __asm__("a0") = rawArgc;
-	register const char *const *a1 __asm__("a1") = rawArgv;
-	register void              *gp __asm__("gp") = _initialGP;
-
-	auto stackTop = uintptr_t(_currentStackPtr) & ~7;
-
-	// Changing the stack pointer and return address is not something that
-	// should be done in a C++ function, but hopefully it's fine here since
-	// we're jumping out right after setting it.
-	__asm__ volatile(
-		".set push\n"
-		".set noreorder\n"
-		"li    $ra, %0\n"
-		"jr    %1\n"
-		"addiu $sp, %2, -8\n"
-		".set pop\n"
-		:: "i"(DEV2_BASE), "r"(_entryPoint), "r"(stackTop),
-		"r"(a0), "r"(a1), "r"(gp)
-	);
-	__builtin_unreachable();
+	year   = timeObj.tm_year + 1900;
+	month  = timeObj.tm_mon  + 1;
+	day    = timeObj.tm_mday;
+	hour   = timeObj.tm_hour;
+	minute = timeObj.tm_min;
+	second = timeObj.tm_sec;
 }
 
 }

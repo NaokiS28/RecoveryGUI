@@ -18,53 +18,30 @@
 #include "common/util/log.hpp"
 #include "common/args.hpp"
 #include "common/gpu.hpp"
-#include "common/io.hpp"
-#include "common/spu.hpp"
 #include "main/app/app.hpp"
 #include "main/uibase.hpp"
-#include "ps1/gpucmd.h"
-#include "ps1/system.h"
 
 int main(int argc, const char **argv) {
-	installExceptionHandler();
-	gpu::init();
-	spu::init();
-	io::init();
 	util::initZipCRC32();
 
 	args::MainArgs args;
 
-	for (; argc > 0; argc--)
-		args.parseArgument(*(argv++));
+	for (; argc > 1; argc--)
+		args.parseArgument(*(++argv));
 
-	util::logger.setupSyslog(args.baudRate);
-
-	// A pointer to the resource archive is always provided on the command line
-	// by the boot stub.
-	if (!args.resourcePtr || !args.resourceLength) {
+	if (!args.resourcePath) {
 		LOG_APP("required arguments missing");
 		return 1;
 	}
 
-	auto gpuCtx = new gpu::Context(
-		GP1_MODE_NTSC, args.screenWidth, args.screenHeight, args.forceInterlace
-	);
+	auto gpuCtx = new gpu::Context(args.screenWidth, args.screenHeight);
 	auto uiCtx  = new ui::Context(*gpuCtx);
 	auto app    = new App(*uiCtx);
 
-	io::initIOBoard();
-	io::resetIDEDevices();
-
-	gpu::enableDisplay(true);
-	spu::setMasterVolume(spu::MAX_VOLUME / 2);
-	io::setMiscOutput(io::MISC_OUT_SPU_ENABLE, true);
-
-	app->run(args.resourcePtr, args.resourceLength);
+	app->run(args.resourcePath);
 
 	delete app;
 	delete uiCtx;
 	delete gpuCtx;
-
-	uninstallExceptionHandler();
 	return 0;
 }

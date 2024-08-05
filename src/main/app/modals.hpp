@@ -18,18 +18,11 @@
 
 #include "common/file/file.hpp"
 #include "common/util/templates.hpp"
-#include "common/ide.hpp"
 #include "main/uibase.hpp"
 #include "main/uicommon.hpp"
 #include "main/uimodals.hpp"
 
 /* Modal screens */
-
-class WorkerStatusScreen : public ui::ProgressScreen {
-public:
-	void show(ui::Context &ctx, bool goBack = false);
-	void update(ui::Context &ctx);
-};
 
 static constexpr size_t NUM_MESSAGE_TYPES = 3;
 
@@ -77,8 +70,6 @@ class FilePickerScreen : public ui::ListScreen {
 private:
 	char _promptText[512];
 	void (*_callback)(ui::Context &ctx);
-
-	int _drives[util::countOf(ide::devices)];
 
 protected:
 	const char *_getItemName(ui::Context &ctx, int index) const;

@@ -20,106 +20,22 @@
 #include "common/util/tween.hpp"
 #include "common/gpu.hpp"
 #include "common/gpufont.hpp"
-#include "common/io.hpp"
-#include "common/pad.hpp"
 #include "main/uibase.hpp"
-#include "ps1/gpucmd.h"
 
 namespace ui {
 
 /* Button state manager */
 
-static const uint32_t _BUTTON_MAPPINGS[NUM_BUTTON_MAPS][NUM_BUTTONS]{
-	{
-		// MAP_JOYSTICK
-		0
-			| io::JAMMA_P1_LEFT
-			| io::JAMMA_P2_LEFT
-			| io::JAMMA_P1_UP
-			| io::JAMMA_P2_UP,
-		0
-			| io::JAMMA_P1_RIGHT
-			| io::JAMMA_P2_RIGHT
-			| io::JAMMA_P1_DOWN
-			| io::JAMMA_P2_DOWN,
-		0
-			| io::JAMMA_P1_START
-			| io::JAMMA_P2_START
-			| io::JAMMA_P1_BUTTON1
-			| io::JAMMA_P2_BUTTON1,
-		io::JAMMA_TEST | io::JAMMA_SERVICE
-	}, {
-		// MAP_DDR_CAB
-		io::JAMMA_P1_BUTTON2 | io::JAMMA_P2_BUTTON2,
-		io::JAMMA_P1_BUTTON3 | io::JAMMA_P2_BUTTON3,
-		io::JAMMA_P1_START   | io::JAMMA_P2_START,
-		io::JAMMA_TEST       | io::JAMMA_SERVICE
-	}, {
-		// MAP_DDR_SOLO_CAB
-		io::JAMMA_P1_BUTTON5,
-		io::JAMMA_P2_BUTTON5,
-		io::JAMMA_P1_START,
-		io::JAMMA_TEST | io::JAMMA_SERVICE
-	}, {
-		// MAP_DM_CAB
-		io::JAMMA_P2_LEFT,
-		io::JAMMA_P2_RIGHT,
-		io::JAMMA_P1_START,
-		io::JAMMA_TEST | io::JAMMA_SERVICE
-	}, {
-		// MAP_DMX_CAB (more or less redundant with MAP_JOYSTICK)
-		io::JAMMA_P1_UP    | io::JAMMA_P2_UP,
-		io::JAMMA_P1_DOWN  | io::JAMMA_P2_DOWN,
-		io::JAMMA_P1_START | io::JAMMA_P2_START,
-		io::JAMMA_TEST     | io::JAMMA_SERVICE
-	}, {
-		// MAP_SINGLE_BUTTON
-		0,
-		0,
-		0
-			| io::JAMMA_P1_START
-			| io::JAMMA_P2_START
-			| io::JAMMA_TEST
-			| io::JAMMA_SERVICE,
-		0
-	}
-};
-
 ButtonState::ButtonState(void)
-: _buttonMap(MAP_JOYSTICK), _held(0), _prevHeld(0), _longHeld(0),
-_prevLongHeld(0), _pressed(0), _released(0), _longPressed(0), _longReleased(0),
-_repeatTimer(0) {}
+: _held(0), _prevHeld(0), _longHeld(0), _prevLongHeld(0), _pressed(0),
+_released(0), _longPressed(0), _longReleased(0), _repeatTimer(0) {}
 
 uint8_t ButtonState::_getHeld(void) const {
+	// TODO: implement
+#if 0
 	auto    inputs = io::getJAMMAInputs();
 	auto    map    = _BUTTON_MAPPINGS[_buttonMap];
 	uint8_t held   = 0;
-
-#ifdef ENABLE_PS1_CONTROLLER
-	if (pad::ports[0].pollPad() || pad::ports[1].pollPad()) {
-		for (int i = 1; i >= 0; i--) {
-			auto &port = pad::ports[i];
-
-			if (
-				(port.padType != pad::PAD_DIGITAL) &&
-				(port.padType != pad::PAD_ANALOG) &&
-				(port.padType != pad::PAD_ANALOG_STICK)
-			)
-				continue;
-
-			if (port.buttons & (pad::BTN_LEFT | pad::BTN_UP))
-				held |= 1 << BTN_LEFT;
-			if (port.buttons & (pad::BTN_RIGHT | pad::BTN_DOWN))
-				held |= 1 << BTN_RIGHT;
-			if (port.buttons & (pad::BTN_CIRCLE | pad::BTN_CROSS))
-				held |= 1 << BTN_START;
-			if (port.buttons & pad::BTN_SELECT)
-				held |= 1 << BTN_DEBUG;
-		}
-
-		return held; // Ignore JAMMA inputs
-	}
-#endif
 
 	for (int i = 0; i < NUM_BUTTONS; i++) {
 		if (inputs & map[i])
@@ -127,6 +43,9 @@ uint8_t ButtonState::_getHeld(void) const {
 	}
 
 	return held;
+#else
+	return 0;
+#endif
 }
 
 void ButtonState::reset(void) {
@@ -149,39 +68,16 @@ void ButtonState::update(void) {
 
 	uint32_t changed = _prevHeld ^ _held;
 
-	if (_buttonMap == MAP_SINGLE_BUTTON) {
-		_pressed  = 0;
-		_released = 0;
-		_longHeld = 0;
+	if (changed & _held)
+		_repeatTimer = 1;
+	else if (changed & _prevHeld)
+		_repeatTimer = 0;
+	else if (_held && _repeatTimer)
+		_repeatTimer++;
 
-		// In single-button mode, interpret a short button press as the right
-		// button and a long press as start. Note that the repeat timer is not
-		// started if single button mode is enabled while a button is held down.
-		if (changed & _held) {
-			_repeatTimer = 1;
-		} else if (changed & _prevHeld) {
-			if (_repeatTimer && (_repeatTimer < REPEAT_DELAY))
-				_pressed  |= 1 << BTN_RIGHT;
-
-			_repeatTimer = 0;
-		} else if (_held && _repeatTimer) {
-			if (_repeatTimer == REPEAT_DELAY)
-				_pressed |= 1 << BTN_START;
-
-			_repeatTimer++;
-		}
-	} else {
-		if (changed & _held)
-			_repeatTimer = 1;
-		else if (changed & _prevHeld)
-			_repeatTimer = 0;
-		else if (_held && _repeatTimer)
-			_repeatTimer++;
-
-		_pressed  = (changed & _held)     & ~_pressed;
-		_released = (changed & _prevHeld) & ~_released;
-		_longHeld = (_repeatTimer >= REPEAT_DELAY) ? _held : 0;
-	}
+	_pressed  = (changed & _held)     & ~_pressed;
+	_released = (changed & _prevHeld) & ~_released;
+	_longHeld = (_repeatTimer >= REPEAT_DELAY) ? _held : 0;
 
 	changed = _prevLongHeld ^ _longHeld;
 
@@ -207,8 +103,8 @@ void Context::show(Screen &screen, bool goBack, bool playSound) {
 	_currentScreen ^= 1;
 	_screens[_currentScreen] = &screen;
 
-	if (playSound)
-		sounds[goBack ? SOUND_EXIT : SOUND_ENTER].play();
+	//if (playSound)
+		//sounds[goBack ? SOUND_EXIT : SOUND_ENTER].play();
 
 	screen.show(*this, goBack);
 }
@@ -260,7 +156,7 @@ void Layer::_setBlendMode(
 
 void TiledBackground::draw(Context &ctx, bool active) const {
 	_newLayer(ctx, 0, 0, ctx.gpuCtx.width, ctx.gpuCtx.height);
-	_setTexturePage(ctx, tile.texpage);
+	//_setTexturePage(ctx, tile.texpage);
 
 	int offsetX = uint32_t(ctx.time / 2) % tile.width;
 	int offsetY = uint32_t(ctx.time / 3) % tile.height;
@@ -302,7 +198,7 @@ void SplashOverlay::draw(Context &ctx, bool active) const {
 	// Backdrop
 	_newLayer(ctx, 0, 0, ctx.gpuCtx.width, ctx.gpuCtx.height);
 	ctx.gpuCtx.drawBackdrop(
-		gp0_rgb(brightness, brightness, brightness), GP0_BLEND_SUBTRACT
+		gpu::rgb(brightness, brightness, brightness), gpu::GP0_BLEND_SUBTRACT
 	);
 
 	if (brightness < 0xff)
@@ -340,7 +236,7 @@ void LogOverlay::draw(Context &ctx, bool active) const {
 		ctx, 0, offset - ctx.gpuCtx.height, ctx.gpuCtx.width,
 		ctx.gpuCtx.height
 	);
-	ctx.gpuCtx.drawBackdrop(ctx.colors[COLOR_BACKDROP], GP0_BLEND_SUBTRACT);
+	ctx.gpuCtx.drawBackdrop(ctx.colors[COLOR_BACKDROP], gpu::GP0_BLEND_SUBTRACT);
 
 	// Text
 	int screenHeight = ctx.gpuCtx.height - SCREEN_MIN_MARGIN_Y * 2;
@@ -367,7 +263,7 @@ void LogOverlay::toggle(Context &ctx) {
 	bool shown = !_slideAnim.getTargetValue();
 
 	_slideAnim.setValue(ctx.time, shown ? ctx.gpuCtx.height : 0, SPEED_SLOW);
-	ctx.sounds[shown ? SOUND_ENTER : SOUND_EXIT].play();
+	//ctx.sounds[shown ? SOUND_ENTER : SOUND_EXIT].play();
 }
 
 void ScreenshotOverlay::draw(Context &ctx, bool active) const {
@@ -378,13 +274,13 @@ void ScreenshotOverlay::draw(Context &ctx, bool active) const {
 
 	_newLayer(ctx, 0, 0, ctx.gpuCtx.width, ctx.gpuCtx.height);
 	ctx.gpuCtx.drawBackdrop(
-		gp0_rgb(brightness, brightness, brightness), GP0_BLEND_ADD
+		gpu::rgb(brightness, brightness, brightness), gpu::GP0_BLEND_ADD
 	);
 }
 
 void ScreenshotOverlay::animate(Context &ctx) {
 	_flashAnim.setValue(ctx.time, 0xff, 0, SPEED_SLOW);
-	ctx.sounds[ui::SOUND_SCREENSHOT].play();
+	//ctx.sounds[ui::SOUND_SCREENSHOT].play();
 }
 
 /* Base screen classes */
@@ -423,7 +319,7 @@ void BackdropScreen::draw(Context &ctx, bool active) const {
 
 	_newLayer(ctx, 0, 0, ctx.gpuCtx.width, ctx.gpuCtx.height);
 	ctx.gpuCtx.drawBackdrop(
-		gp0_rgb(brightness, brightness, brightness), GP0_BLEND_ADD
+		gpu::rgb(brightness, brightness, brightness), gpu::GP0_BLEND_ADD
 	);
 }
 
@@ -447,7 +343,7 @@ void ModalScreen::draw(Context &ctx, bool active) const {
 			(ctx.gpuCtx.height - windowHeight) / 2, _width + SHADOW_OFFSET,
 			windowHeight + SHADOW_OFFSET
 		);
-		_setBlendMode(ctx, GP0_BLEND_SEMITRANS, true);
+		_setBlendMode(ctx, gpu::GP0_BLEND_SEMITRANS, true);
 
 		// Window
 		ctx.gpuCtx.drawGradientRectD(

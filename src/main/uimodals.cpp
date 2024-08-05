@@ -106,9 +106,9 @@ void MessageBoxScreen::update(Context &ctx) {
 		_activeButton--;
 		if (_activeButton < 0) {
 			_activeButton += numButtons;
-			ctx.sounds[SOUND_CLICK].play();
+			//ctx.sounds[SOUND_CLICK].play();
 		} else {
-			ctx.sounds[SOUND_MOVE].play();
+			//ctx.sounds[SOUND_MOVE].play();
 		}
 
 		_buttonAnim.setValue(ctx.time, 0, _getButtonWidth(), SPEED_FASTEST);
@@ -120,9 +120,9 @@ void MessageBoxScreen::update(Context &ctx) {
 		_activeButton++;
 		if (_activeButton >= numButtons) {
 			_activeButton -= numButtons;
-			ctx.sounds[SOUND_CLICK].play();
+			//ctx.sounds[SOUND_CLICK].play();
 		} else {
-			ctx.sounds[SOUND_MOVE].play();
+			//ctx.sounds[SOUND_MOVE].play();
 		}
 
 		_buttonAnim.setValue(ctx.time, 0, _getButtonWidth(), SPEED_FASTEST);
@@ -210,9 +210,9 @@ void HexEntryScreen::update(Context &ctx) {
 		) {
 			if (--value < 0) {
 				value = 0xf;
-				ctx.sounds[SOUND_CLICK].play();
+				//ctx.sounds[SOUND_CLICK].play();
 			} else {
-				ctx.sounds[SOUND_MOVE].play();
+				//ctx.sounds[SOUND_MOVE].play();
 			}
 		}
 		if (
@@ -221,9 +221,9 @@ void HexEntryScreen::update(Context &ctx) {
 		) {
 			if (++value > 0xf) {
 				value = 0;
-				ctx.sounds[SOUND_CLICK].play();
+				//ctx.sounds[SOUND_CLICK].play();
 			} else {
-				ctx.sounds[SOUND_MOVE].play();
+				//ctx.sounds[SOUND_MOVE].play();
 			}
 		}
 
@@ -388,9 +388,9 @@ void DateEntryScreen::update(Context &ctx) {
 		) {
 			if (--value < field.minValue) {
 				value = field.maxValue;
-				ctx.sounds[SOUND_CLICK].play();
+				//ctx.sounds[SOUND_CLICK].play();
 			} else {
-				ctx.sounds[SOUND_MOVE].play();
+				//ctx.sounds[SOUND_MOVE].play();
 			}
 		}
 		if (
@@ -399,9 +399,9 @@ void DateEntryScreen::update(Context &ctx) {
 		) {
 			if (++value > field.maxValue) {
 				value = field.minValue;
-				ctx.sounds[SOUND_CLICK].play();
+				//ctx.sounds[SOUND_CLICK].play();
 			} else {
-				ctx.sounds[SOUND_MOVE].play();
+				//ctx.sounds[SOUND_MOVE].play();
 			}
 		}
 
@@ -451,7 +451,7 @@ void ProgressScreen::draw(Context &ctx, bool active) const {
 	int barY = TITLE_BAR_HEIGHT + _height -
 		(PROGRESS_BAR_HEIGHT + MODAL_PADDING);
 
-	_setBlendMode(ctx, GP0_BLEND_SEMITRANS, true);
+	_setBlendMode(ctx, gpu::GP0_BLEND_SEMITRANS, true);
 
 	ctx.gpuCtx.drawRect(
 		barX, barY, fullBarWidth, PROGRESS_BAR_HEIGHT, ctx.colors[COLOR_WINDOW3]

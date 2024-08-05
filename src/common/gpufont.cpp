@@ -18,7 +18,6 @@
 #include "common/util/string.hpp"
 #include "common/gpu.hpp"
 #include "common/gpufont.hpp"
-#include "ps1/gpucmd.h"
 
 namespace gpu {
 
@@ -51,7 +50,7 @@ void Font::draw(
 	if (!str || !metrics.ptr)
 		return;
 
-	ctx.setTexturePage(image.texpage);
+	//ctx.setTexturePage(image.texpage);
 
 	auto header = metrics.getHeader();
 
@@ -104,12 +103,7 @@ void Font::draw(
 				if (
 					(x >= (clipX1 - w)) && (x <= clipX2) && (y >= (clipY1 - h))
 				) {
-					auto cmd = ctx.newPacket(4);
-
-					cmd[0] = color | gp0_rectangle(true, size & 1, true);
-					cmd[1] = gp0_xy(x, y);
-					cmd[2] = gp0_uv(u + image.u, v + image.v, image.palette);
-					cmd[3] = gp0_xy(w, h);
+					// TODO: draw the glyph here
 				}
 
 				x   += w;

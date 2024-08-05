@@ -143,22 +143,22 @@ public:
 	inline RingBuffer(void)
 	: _head(0), _tail(0), length(0) {}
 
-	inline T *pushItem(void) volatile {
+	inline T *pushItem(void) {
 		if (length >= N)
 			return nullptr;
 
-		size_t i = _tail;
-		_tail    = (i + 1) % N;
+		auto i = _tail;
+		_tail  = (i + 1) % N;
 		length++;
 
 		return &_items[i];
 	}
-	inline T *popItem(void) volatile {
+	inline T *popItem(void) {
 		if (!length)
 			return nullptr;
 
-		size_t i = _head;
-		_head    = (i + 1) % N;
+		auto i = _head;
+		_head  = (i + 1) % N;
 		length--;
 
 		return &_items[i];

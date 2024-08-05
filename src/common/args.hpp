@@ -17,46 +17,17 @@
 #pragma once
 
 #include <stddef.h>
-#include "common/file/file.hpp"
-#include "common/util/misc.hpp"
 
 namespace args {
 
 /* Command line argument parsers */
 
-static constexpr size_t MAX_LAUNCHER_FRAGMENTS = 64;
-
-class CommonArgs {
-public:
-	int baudRate;
-
-	CommonArgs(void);
-	bool parseArgument(const char *arg);
-};
-
-class MainArgs : public CommonArgs {
+class MainArgs {
 public:
 	int        screenWidth, screenHeight;
-	bool       forceInterlace;
-	const void *resourcePtr;
-	size_t     resourceLength;
+	const char *resourcePath;
 
 	MainArgs(void);
-	bool parseArgument(const char *arg);
-};
-
-class ExecutableLauncherArgs : public CommonArgs {
-public:
-	void *entryPoint, *initialGP, *stackTop;
-
-	void *loadAddress;
-	int  device; // 0-63 = flash, -1 or -2 = IDE
-
-	size_t             numArgs, numFragments;
-	const char         *executableArgs[util::MAX_EXECUTABLE_ARGS];
-	file::FileFragment fragments[MAX_LAUNCHER_FRAGMENTS];
-
-	ExecutableLauncherArgs(void);
 	bool parseArgument(const char *arg);
 };
 

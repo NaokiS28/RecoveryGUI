@@ -19,7 +19,6 @@
 #include "common/gpu.hpp"
 #include "main/uibase.hpp"
 #include "main/uicommon.hpp"
-#include "ps1/gpucmd.h"
 
 namespace ui {
 
@@ -98,10 +97,10 @@ void TextScreen::update(Context &ctx) {
 	) {
 		if (value <= 0) {
 			value = scrollHeight;
-			ctx.sounds[SOUND_CLICK].play();
+			//ctx.sounds[SOUND_CLICK].play();
 		} else {
 			value -= util::min(SCROLL_AMOUNT, value);
-			ctx.sounds[SOUND_MOVE].play();
+			//ctx.sounds[SOUND_MOVE].play();
 		}
 
 		_scrollAnim.setValue(ctx.time, oldValue, value, SPEED_FASTEST);
@@ -112,10 +111,10 @@ void TextScreen::update(Context &ctx) {
 	) {
 		if (value >= scrollHeight) {
 			value = 0;
-			ctx.sounds[SOUND_CLICK].play();
+			//ctx.sounds[SOUND_CLICK].play();
 		} else {
 			value += util::min(SCROLL_AMOUNT, scrollHeight - value);
-			ctx.sounds[SOUND_MOVE].play();
+			//ctx.sounds[SOUND_MOVE].play();
 		}
 
 		_scrollAnim.setValue(ctx.time, oldValue, value, SPEED_FASTEST);
@@ -259,7 +258,7 @@ void ListScreen::draw(Context &ctx, bool active) const {
 		SCREEN_MARGIN_Y + lineHeight + SCREEN_BLOCK_MARGIN, screenWidth,
 		listHeight
 	);
-	_setBlendMode(ctx, GP0_BLEND_SEMITRANS, true);
+	_setBlendMode(ctx, gpu::GP0_BLEND_SEMITRANS, true);
 
 	// List box
 	ctx.gpuCtx.drawRect(
@@ -303,9 +302,9 @@ void ListScreen::update(Context &ctx) {
 		_activeItem--;
 		if (_activeItem < 0) {
 			_activeItem += _listLength;
-			ctx.sounds[SOUND_CLICK].play();
+			//ctx.sounds[SOUND_CLICK].play();
 		} else {
-			ctx.sounds[SOUND_MOVE].play();
+			//ctx.sounds[SOUND_MOVE].play();
 		}
 
 		_itemAnim.setValue(ctx.time, 0, _getItemWidth(ctx), SPEED_FAST);
@@ -318,9 +317,9 @@ void ListScreen::update(Context &ctx) {
 		_activeItem++;
 		if (_activeItem >= _listLength) {
 			_activeItem -= _listLength;
-			ctx.sounds[SOUND_CLICK].play();
+			//ctx.sounds[SOUND_CLICK].play();
 		} else {
-			ctx.sounds[SOUND_MOVE].play();
+			//ctx.sounds[SOUND_MOVE].play();
 		}
 
 		_itemAnim.setValue(ctx.time, 0, _getItemWidth(ctx), SPEED_FAST);

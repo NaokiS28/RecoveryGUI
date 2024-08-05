@@ -52,10 +52,9 @@ private:
 
 public:
 	inline Logger(void)
-	: _buffer(nullptr), _enableSyslog(false) {}
+	: _buffer(nullptr), _enableSyslog(true) {}
 
 	void setLogBuffer(LogBuffer *buffer);
-	void setupSyslog(int baudRate);
 	void log(const char *format, ...);
 };
 
@@ -74,30 +73,6 @@ extern Logger logger;
 #define LOG_APP(fmt, ...) LOG("app", fmt __VA_OPT__(,) __VA_ARGS__)
 #else
 #define LOG_APP(fmt, ...)
-#endif
-
-#ifdef ENABLE_CART_IO_LOGGING
-#define LOG_CART_IO(fmt, ...) LOG("cart", fmt __VA_OPT__(,) __VA_ARGS__)
-#else
-#define LOG_CART_IO(fmt, ...)
-#endif
-
-#ifdef ENABLE_CART_DATA_LOGGING
-#define LOG_CART_DATA(fmt, ...) LOG("data", fmt __VA_OPT__(,) __VA_ARGS__)
-#else
-#define LOG_CART_DATA(fmt, ...)
-#endif
-
-#ifdef ENABLE_ROM_LOGGING
-#define LOG_ROM(fmt, ...) LOG("rom", fmt __VA_OPT__(,) __VA_ARGS__)
-#else
-#define LOG_ROM(fmt, ...)
-#endif
-
-#ifdef ENABLE_IDE_LOGGING
-#define LOG_IDE(fmt, ...) LOG("ide", fmt __VA_OPT__(,) __VA_ARGS__)
-#else
-#define LOG_IDE(fmt, ...)
 #endif
 
 #ifdef ENABLE_FS_LOGGING

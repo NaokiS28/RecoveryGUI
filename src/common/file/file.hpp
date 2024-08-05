@@ -21,7 +21,6 @@
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
 #include "common/gpu.hpp"
-#include "common/spu.hpp"
 
 namespace file {
 
@@ -113,8 +112,6 @@ public:
 
 /* Base file and asset provider classes */
 
-extern uint32_t currentSPUOffset;
-
 class Provider {
 public:
 	FileSystemType type;
@@ -153,8 +150,6 @@ public:
 	virtual size_t saveData(const void *input, size_t length, const char *path);
 
 	size_t loadTIM(gpu::Image &output, const char *path);
-	size_t loadVAG(spu::Sound &output, const char *path);
-	size_t saveVRAMBMP(gpu::RectWH &rect, const char *path);
 };
 
 /* String table parser */

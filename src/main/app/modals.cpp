@@ -22,32 +22,12 @@
 #include "common/util/log.hpp"
 #include "common/util/templates.hpp"
 #include "common/defs.hpp"
-#include "common/ide.hpp"
 #include "main/app/app.hpp"
 #include "main/app/modals.hpp"
 #include "main/uibase.hpp"
 #include "main/uicommon.hpp"
 
 /* Modal screens */
-
-void WorkerStatusScreen::show(ui::Context &ctx, bool goBack) {
-	_title = STR("WorkerStatusScreen.title");
-
-	ProgressScreen::show(ctx, goBack);
-}
-
-void WorkerStatusScreen::update(ui::Context &ctx) {
-	auto &worker = APP->_workerStatus;
-
-	if (worker.status == WORKER_DONE) {
-		worker.setStatus(WORKER_IDLE);
-		ctx.show(*worker.nextScreen, worker.nextGoBack);
-		return;
-	}
-
-	_setProgress(ctx, worker.progress, worker.progressTotal);
-	_body = worker.message;
-}
 
 static const util::Hash _MESSAGE_TITLES[]{
 	"MessageScreen.title.success"_h,
@@ -74,7 +54,7 @@ void MessageScreen::show(ui::Context &ctx, bool goBack) {
 	//_locked     = !previousScreen;
 
 	MessageBoxScreen::show(ctx, goBack);
-	ctx.sounds[ui::SOUND_ALERT].play();
+	//ctx.sounds[ui::SOUND_ALERT].play();
 }
 
 void MessageScreen::update(ui::Context &ctx) {
@@ -121,46 +101,21 @@ void ConfirmScreen::update(ui::Context &ctx) {
 
 /* File picker screen */
 
-#ifdef ENABLE_PCDRV
-struct SpecialEntry {
+struct FilesystemEntry {
 public:
 	util::Hash name;
 	const char *prefix;
 };
 
-static const SpecialEntry _SPECIAL_ENTRIES[]{
+static const FilesystemEntry _FILESYSTEM_ENTRIES[]{
 	{
 		.name   = "FilePickerScreen.host"_h,
 		.prefix = "host:"
 	}
 };
-#endif
 
 const char *FilePickerScreen::_getItemName(ui::Context &ctx, int index) const {
-#ifdef ENABLE_PCDRV
-	int offset = util::countOf(_SPECIAL_ENTRIES);
-
-	if (index < offset)
-		return STRH(_SPECIAL_ENTRIES[index].name);
-	else
-		index -= offset;
-#endif
-
-	static char name[file::MAX_NAME_LENGTH]; // TODO: get rid of this ugly crap
-
-	int  drive = _drives[index];
-	auto &dev  = ide::devices[drive];
-	auto fs    = APP->_fileIO.ide[drive];
-
-	auto format = (dev.flags & ide::DEVICE_ATAPI)
-		? (CH_CDROM_ICON " %s: %s")
-		: (CH_HDD_ICON   " %s: %s");
-	auto label  = fs
-		? fs->volumeLabel
-		: STR("FilePickerScreen.noFS");
-
-	snprintf(name, sizeof(name), format, dev.model, label);
-	return name;
+	return STRH(_FILESYSTEM_ENTRIES[index].name);
 }
 
 void FilePickerScreen::setMessage(
@@ -176,6 +131,7 @@ void FilePickerScreen::setMessage(
 }
 
 void FilePickerScreen::reloadAndShow(ui::Context &ctx) {
+#if 0
 	// Check if any drive has reported a disc change and reload all filesystems
 	// if necessary.
 	for (auto &dev : ide::devices) {
@@ -187,6 +143,7 @@ void FilePickerScreen::reloadAndShow(ui::Context &ctx) {
 		APP->_runWorker(&App::_fileInitWorker, *this, false, true);
 		return;
 	}
+#endif
 
 	ctx.show(*this, false, true);
 }
@@ -196,16 +153,7 @@ void FilePickerScreen::show(ui::Context &ctx, bool goBack) {
 	_prompt     = _promptText;
 	_itemPrompt = STR("FilePickerScreen.itemPrompt");
 
-	_listLength = 0;
-
-	for (size_t i = 0; i < util::countOf(ide::devices); i++) {
-		if (ide::devices[i].flags & ide::DEVICE_READY)
-			_drives[_listLength++] = i;
-	}
-
-#ifdef ENABLE_PCDRV
-	_listLength += util::countOf(_SPECIAL_ENTRIES);
-#endif
+	_listLength = util::countOf(_FILESYSTEM_ENTRIES);
 
 	ListScreen::show(ctx, goBack);
 }
@@ -213,6 +161,7 @@ void FilePickerScreen::show(ui::Context &ctx, bool goBack) {
 void FilePickerScreen::update(ui::Context &ctx) {
 	ListScreen::update(ctx);
 
+#if 0
 	if (!_listLength) {
 		APP->_messageScreen.previousScreens[MESSAGE_ERROR] = previousScreen;
 		APP->_messageScreen.setMessage(
@@ -221,49 +170,16 @@ void FilePickerScreen::update(ui::Context &ctx) {
 		ctx.show(APP->_messageScreen, false, true);
 		return;
 	}
+#endif
 
 	if (ctx.buttons.pressed(ui::BTN_START)) {
 		if (ctx.buttons.held(ui::BTN_LEFT) || ctx.buttons.held(ui::BTN_RIGHT)) {
 			ctx.show(*previousScreen, true, true);
 		} else {
-			int index  = _activeItem;
-#ifdef ENABLE_PCDRV
-			int offset = util::countOf(_SPECIAL_ENTRIES);
-
-			if (index < offset) {
-				APP->_fileBrowserScreen.loadDirectory(
-					ctx, _SPECIAL_ENTRIES[index].prefix
-				);
-				ctx.show(APP->_fileBrowserScreen, false, true);
-				return;
-			} else {
-				index -= offset;
-			}
-#endif
-
-			int  drive = _drives[index];
-			auto &dev  = ide::devices[drive];
-
-			int count = APP->_fileBrowserScreen.loadDirectory(
-				ctx, IDE_MOUNT_POINTS[drive]
+			APP->_fileBrowserScreen.loadDirectory(
+				ctx, _FILESYSTEM_ENTRIES[_activeItem].prefix
 			);
-
-			if (count > 0) {
-				ctx.show(APP->_fileBrowserScreen, false, true);
-			} else {
-				util::Hash error;
-
-				if (!count)
-					error = "FilePickerScreen.noFilesError"_h;
-				else if (dev.flags & ide::DEVICE_ATAPI)
-					error = "FilePickerScreen.atapiError"_h;
-				else
-					error = "FilePickerScreen.ideError"_h;
-
-				APP->_messageScreen.previousScreens[MESSAGE_ERROR] = this;
-				APP->_messageScreen.setMessage(MESSAGE_ERROR, STRH(error));
-				ctx.show(APP->_messageScreen, false, true);
-			}
+			ctx.show(APP->_fileBrowserScreen, false, true);
 		}
 	}
 }
