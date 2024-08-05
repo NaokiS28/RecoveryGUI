@@ -52,10 +52,9 @@ private:
 
 public:
 	inline Logger(void)
-	: _buffer(nullptr), _enableSyslog(false) {}
+	: _buffer(nullptr), _enableSyslog(true) {}
 
 	void setLogBuffer(LogBuffer *buffer);
-	void setupSyslog(int baudRate);
 	void log(const char *format, ...);
 };
 

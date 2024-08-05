@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
-#include "ps1/registers.h"
 
 namespace util {
 
@@ -86,20 +85,21 @@ uint16_t zsCRC16(const uint8_t *data, size_t length) {
 	return (crc ^ 0xffff) & 0xffff;
 }
 
+static uint32_t _CRC32_TABLE[256];
+
 uint32_t zipCRC32(const uint8_t *data, size_t length, uint32_t crc) {
 	// This CRC32 implementation uses a lookup table cached in the scratchpad
 	// area in order to improve performance.
-	auto table = reinterpret_cast<const uint32_t *>(CACHE_BASE);
-	crc        = ~crc;
+	crc = ~crc;
 
 	for (; length; length--)
-		crc = (crc >> 8) ^ table[(crc ^ *(data++)) & 0xff];
+		crc = (crc >> 8) ^ _CRC32_TABLE[(crc ^ *(data++)) & 0xff];
 
 	return ~crc;
 }
 
 void initZipCRC32(void) {
-	auto table = reinterpret_cast<uint32_t *>(CACHE_BASE);
+	auto table = _CRC32_TABLE;
 
 	for (int i = 0; i < 256; i++) {
 		uint32_t crc = i;

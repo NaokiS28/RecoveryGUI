@@ -18,18 +18,27 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "ps1/gpucmd.h"
-#include "ps1/registers.h"
-#include "vendor/qrcodegen.h"
 
 namespace gpu {
 
 /* Types */
 
-using Color      = uint32_t;
-using BlendMode  = GP0BlendMode;
-using ColorDepth = GP0ColorDepth;
-using VideoMode  = GP1VideoMode;
+using Color = uint32_t;
+
+enum BlendMode {
+	GP0_BLEND_BITMASK   = 3,
+	GP0_BLEND_SEMITRANS = 0,
+	GP0_BLEND_ADD       = 1,
+	GP0_BLEND_SUBTRACT  = 2,
+	GP0_BLEND_DIV4_ADD  = 3
+};
+
+enum ColorDepth {
+	GP0_COLOR_BITMASK = 3,
+	GP0_COLOR_4BPP    = 0,
+	GP0_COLOR_8BPP    = 1,
+	GP0_COLOR_16BPP   = 2
+};
 
 struct Rect {
 public:
@@ -46,28 +55,12 @@ public:
 	int16_t x, y, r, b;
 };
 
-/* Basic API */
-
-static inline void init(void) {
-	GPU_GP1 = gp1_resetGPU();
-	GPU_GP1 = gp1_resetFIFO();
-
-	TIMER_CTRL(0) = TIMER_CTRL_EXT_CLOCK;
-	TIMER_CTRL(1) = TIMER_CTRL_EXT_CLOCK;
+static inline uint32_t rgb(uint8_t r, uint8_t g, uint8_t b) {
+	return 0
+		| ((r & 0xff) <<  0)
+		| ((g & 0xff) <<  8)
+		| ((b & 0xff) << 16);
 }
-
-static inline bool isIdle(void) {
-	return (
-		!(DMA_CHCR(DMA_GPU) & DMA_CHCR_ENABLE) && (GPU_GP1 & GP1_STAT_CMD_READY)
-	);
-}
-
-static inline void enableDisplay(bool enable) {
-	GPU_GP1 = gp1_dispBlank(!enable);
-}
-
-size_t upload(const RectWH &rect, const void *data, bool wait);
-size_t download(const RectWH &rect, void *data, bool wait);
 
 /* Rendering context */
 
@@ -95,19 +88,12 @@ private:
 		return _buffers[_currentBuffer ^ 1];
 	}
 
-	void _applyResolution(
-		VideoMode mode, bool forceInterlace = false, int shiftX = 0,
-		int shiftY = 0
-	) const;
-
 public:
 	int width, height, refreshRate;
 
-	inline Context(
-		VideoMode mode, int width, int height, bool forceInterlace = false,
-		bool sideBySide = false
-	) : _lastTexpage(0) {
-		setResolution(mode, width, height, forceInterlace, sideBySide);
+	inline Context(int width, int height)
+	: _lastTexpage(0) {
+		setResolution(width, height);
 	}
 	inline void getVRAMClipRect(RectWH &output) const {
 		auto &clip = _buffers[_currentBuffer ^ 1].clip;
@@ -151,10 +137,7 @@ public:
 		drawRect(0, 0, width, height, color, true);
 	}
 
-	void setResolution(
-		VideoMode mode, int width, int height, bool forceInterlace = false,
-		bool sideBySide = false
-	);
+	void setResolution(int width, int height);
 	void flip(void);
 
 	uint32_t *newPacket(size_t length);
@@ -195,7 +178,6 @@ public:
 class Image {
 public:
 	uint16_t u, v, width, height;
-	uint16_t texpage, palette;
 
 	inline Image(void)
 	: width(0), height(0) {}
@@ -212,16 +194,5 @@ public:
 	) const;
 	void draw(Context &ctx, int x, int y, bool blend = false) const;
 };
-
-/* QR code encoder */
-
-bool generateQRCode(
-	Image &output, int x, int y, const char *str,
-	qrcodegen_Ecc ecc = qrcodegen_Ecc_MEDIUM
-);
-bool generateQRCode(
-	Image &output, int x, int y, const uint8_t *data, size_t length,
-	qrcodegen_Ecc ecc = qrcodegen_Ecc_MEDIUM
-);
 
 }

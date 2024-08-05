@@ -21,14 +21,12 @@
 #include "common/util/tween.hpp"
 #include "common/gpu.hpp"
 #include "common/gpufont.hpp"
-#include "common/spu.hpp"
 
 namespace ui {
 
 /* Public constants */
 
 static constexpr int NUM_UI_COLORS = 18;
-static constexpr int NUM_UI_SOUNDS = 8;
 
 enum Color {
 	COLOR_DEFAULT    =  0,
@@ -49,17 +47,6 @@ enum Color {
 	COLOR_TEXT2      = 15,
 	COLOR_TITLE      = 16,
 	COLOR_SUBTITLE   = 17
-};
-
-enum Sound {
-	SOUND_STARTUP      = 0,
-	SOUND_ABOUT_SCREEN = 1,
-	SOUND_ALERT        = 2,
-	SOUND_MOVE         = 3,
-	SOUND_ENTER        = 4,
-	SOUND_EXIT         = 5,
-	SOUND_CLICK        = 6,
-	SOUND_SCREENSHOT   = 7
 };
 
 enum AnimationSpeed {
@@ -100,9 +87,8 @@ static constexpr int SCROLL_AMOUNT = 32;
 
 /* Button state manager */
 
-static constexpr int NUM_BUTTONS     = 4;
-static constexpr int NUM_BUTTON_MAPS = 6;
-static constexpr int REPEAT_DELAY    = 30;
+static constexpr int NUM_BUTTONS  = 4;
+static constexpr int REPEAT_DELAY = 30;
 
 enum Button {
 	BTN_LEFT  = 0,
@@ -111,20 +97,8 @@ enum Button {
 	BTN_DEBUG = 3
 };
 
-enum ButtonMap {
-	MAP_JOYSTICK      = 0,
-	MAP_DDR_CAB       = 1,
-	MAP_DDR_SOLO_CAB  = 2,
-	MAP_DM_CAB        = 3,
-	MAP_DMX_CAB       = 4,
-	MAP_SINGLE_BUTTON = 5  // Used when selecting button mapping
-};
-
 class ButtonState {
 private:
-	ButtonMap _buttonMap;
-	uint32_t  _mappings[NUM_BUTTONS];
-
 	uint8_t _held, _prevHeld;
 	uint8_t _longHeld, _prevLongHeld;
 	uint8_t _pressed, _released;
@@ -135,11 +109,6 @@ private:
 	uint8_t _getHeld(void) const;
 
 public:
-	inline void setButtonMap(ButtonMap map) {
-		reset();
-		_buttonMap = map;
-	}
-
 	inline bool held(Button button) const {
 		return (_held >> button) & 1;
 	}
@@ -182,10 +151,8 @@ public:
 
 	gpu::Font  font;
 	gpu::Color colors[NUM_UI_COLORS];
-	spu::Sound sounds[NUM_UI_SOUNDS];
 
 	ButtonState buttons;
-	spu::Stream audioStream;
 
 	int  time;
 	void *screenData; // Opaque, can be accessed by screens

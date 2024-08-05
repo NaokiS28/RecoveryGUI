@@ -3,31 +3,9 @@
 
 	"resources": [
 		{
-			"type":        "binary",
-			"name":        "binaries/main.psexe.lz4",
-			"source":      "${PROJECT_BINARY_DIR}/main.psexe",
-			"compression": "lz4"
-		},
-		{
-			"type":   "binary",
-			"name":   "binaries/launcher801fd000.psexe",
-			"source": "${PROJECT_BINARY_DIR}/launcher801fd000.psexe"
-		},
-		{
-			"type":   "binary",
-			"name":   "binaries/launcher803fd000.psexe",
-			"source": "${PROJECT_BINARY_DIR}/launcher803fd000.psexe"
-		},
-
-		{
 			"type":   "strings",
 			"name":   "assets/lang/en.lang",
 			"source": "${PROJECT_SOURCE_DIR}/assets/lang/en.json"
-		},
-		{
-			"type":   "strings",
-			"name":   "assets/lang/it.lang",
-			"source": "${PROJECT_SOURCE_DIR}/assets/lang/it.json"
 		},
 		{
 			"type":     "tim",
@@ -59,54 +37,6 @@
 			"source": "${PROJECT_SOURCE_DIR}/assets/textures/font.json"
 		},
 		{
-			"type":        "binary",
-			"name":        "assets/sounds/startup.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/startup.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/about.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/about.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/alert.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/alert.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/move.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/move.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/enter.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/enter.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/exit.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/exit.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/click.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/click.vag",
-			"compression": "none"
-		},
-		{
-			"type":        "binary",
-			"name":        "assets/sounds/screenshot.vag",
-			"source":      "${PROJECT_SOURCE_DIR}/assets/sounds/screenshot.vag",
-			"compression": "none"
-		},
-		{
 			"type":   "text",
 			"name":   "assets/about.txt",
 			"source": "${PROJECT_BINARY_DIR}/about.txt"
@@ -116,28 +46,6 @@
 			"name":        "assets/palette.dat",
 			"source":      "${PROJECT_SOURCE_DIR}/assets/palette.json",
 			"compression": "none"
-		},
-
-		{
-			"type":   "binary",
-			"name":   "data/fpga.bit",
-			"source": "${PROJECT_SOURCE_DIR}/data/fpga.bit"
-		},
-		{
-			"type":   "db",
-			"name":   "data/games.db",
-			"source": "${PROJECT_SOURCE_DIR}/data/games.json"
-		},
-
-		{
-			"type":   "binary",
-			"name":   "data/x76f041.db",
-			"source": "${PROJECT_SOURCE_DIR}/data/x76f041.db"
-		},
-		{
-			"type":   "binary",
-			"name":   "data/zs01.db",
-			"source": "${PROJECT_SOURCE_DIR}/data/zs01.db"
 		}
 	]
 }

@@ -16,167 +16,109 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #include "common/file/file.hpp"
 #include "common/file/misc.hpp"
 #include "common/util/hash.hpp"
 #include "common/util/log.hpp"
 #include "common/util/templates.hpp"
-#include "ps1/pcdrv.h"
 
 namespace file {
 
-/* PCDRV utilities */
-
-static void _dirEntryToFileInfo(FileInfo &output, const PCDRVDirEntry &entry) {
-	__builtin_strncpy(output.name, entry.name, sizeof(output.name));
-	output.size       = entry.size;
-	output.attributes = entry.attributes;
-}
-
-/* PCDRV file and directory classes */
+/* Host file and directory classes */
 
 size_t HostFile::read(void *output, size_t length) {
-	int actualLength = pcdrvRead(_fd, output, length);
-
-	if (actualLength < 0) {
-		LOG_FS("PCDRV error %d, fd=%d", actualLength, _fd);
-		return 0;
-	}
-
-	return size_t(actualLength);
+	return fread(output, 1, length, _fd);
 }
 
 size_t HostFile::write(const void *input, size_t length) {
-	int actualLength = pcdrvWrite(_fd, input, length);
-
-	if (actualLength < 0) {
-		LOG_FS("PCDRV error %d, fd=%d", actualLength, _fd);
-		return 0;
-	}
-
-	return size_t(actualLength);
+	return fwrite(input, 1, length, _fd);
 }
 
 uint64_t HostFile::seek(uint64_t offset) {
-	int actualOffset = pcdrvSeek(_fd, int(offset), PCDRV_SEEK_SET);
-
-	if (actualOffset < 0) {
-		LOG_FS("PCDRV error %d, fd=%d", actualOffset, _fd);
-		return 0;
-	}
-
-	return uint64_t(actualOffset);
+	fseek(_fd, offset, SEEK_SET);
+	return ftell(_fd);
 }
 
 uint64_t HostFile::tell(void) const {
-	int actualOffset = pcdrvSeek(_fd, 0, PCDRV_SEEK_CUR);
-
-	if (actualOffset < 0) {
-		LOG_FS("PCDRV error %d, fd=%d", actualOffset, _fd);
-		return 0;
-	}
-
-	return uint64_t(actualOffset);
+	return ftell(_fd);
 }
 
 void HostFile::close(void) {
-	pcdrvClose(_fd);
+	fclose(_fd);
 }
 
 bool HostDirectory::getEntry(FileInfo &output) {
-	if (_fd < 0)
-		return false;
-
-	// Return the last entry fetched while also fetching the next one (if any).
-	_dirEntryToFileInfo(output, _entry);
-	if (pcdrvFindNext(_fd, &_entry) < 0)
-		_fd = -1;
-
-	return true;
+	// TODO: implement
+	return false;
 }
 
-/* PCDRV filesystem provider */
+/* Host filesystem provider */
 
 bool HostProvider::init(void) {
-	int error = pcdrvInit();
-
-	if (error < 0) {
-		LOG_FS("PCDRV error %d", error);
-		return false;
-	}
-
-	type = HOST;
 	return true;
 }
 
 bool HostProvider::getFileInfo(FileInfo &output, const char *path) {
-	PCDRVDirEntry entry;
-
-	int fd = pcdrvFindFirst(path, &entry);
-
-	if (fd < 0) {
-		LOG_FS("PCDRV error %d: %s", fd, path);
-		return false;
-	}
-
-	_dirEntryToFileInfo(output, entry);
-	return true;
+	// TODO: implement
+	return false;
 }
 
 Directory *HostProvider::openDirectory(const char *path) {
-	char pattern[MAX_PATH_LENGTH];
-	char *ptr = pattern;
-
-	while (*path)
-		*(ptr++) = *(path++);
-
-	*(ptr++) = '/';
-	*(ptr++) = '*';
-	*(ptr++) = 0;
-
-	auto dir = new HostDirectory();
-	int  fd  = pcdrvFindFirst(pattern, &(dir->_entry));
-
-	if (fd < 0) {
-		LOG_FS("PCDRV error %d: %s", fd, path);
-		delete dir;
-		return nullptr;
-	}
-
-	return dir;
+	// TODO: implement
+	return nullptr;
 }
 
 bool HostProvider::createDirectory(const char *path) {
-	int error = pcdrvCreateDir(path);
-
-	if (error < 0) {
-		LOG_FS("PCDRV error %d: %s", error, path);
-		return false;
-	}
-
-	return true;
+	// TODO: implement
+	return false;
 }
 
 File *HostProvider::openFile(const char *path, uint32_t flags) {
-	PCDRVOpenMode mode = PCDRV_MODE_READ;
+	const char *mode;
 
-	if ((flags & (READ | WRITE)) == (READ | WRITE))
-		mode = PCDRV_MODE_READ_WRITE;
-	else if (flags & WRITE)
-		mode = PCDRV_MODE_WRITE;
+	switch (flags) {
+		case READ:
+			mode = "rb";
+			break;
 
-	int fd = pcdrvOpen(path, mode);
+		case WRITE:
+		case WRITE | FORCE_CREATE:
+			mode = "wb";
+			break;
 
-	if (fd < 0) {
-		LOG_FS("PCDRV error %d: %s", fd, path);
+		case WRITE | ALLOW_CREATE:
+			mode = "ab";
+			break;
+
+		case READ | WRITE | FORCE_CREATE:
+			mode = "w+b";
+			break;
+
+		case READ | WRITE:
+		case READ | WRITE | ALLOW_CREATE:
+			mode = "r+b";
+			break;
+
+		default:
+			return nullptr;
+	}
+
+	auto fd = fopen(path, mode);
+
+	if (!fd) {
+		LOG_FS("failed to open %s", path);
 		return nullptr;
 	}
 
+	fseek(fd, 0, SEEK_END);
+
 	auto file  = new HostFile();
 	file->_fd  = fd;
-	file->size = pcdrvSeek(fd, 0, PCDRV_SEEK_END);
+	file->size = ftell(fd);
 
-	pcdrvSeek(fd, 0, PCDRV_SEEK_SET);
+	fseek(fd, 0, SEEK_SET);
 	return file;
 }
 

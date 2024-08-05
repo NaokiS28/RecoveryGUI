@@ -43,17 +43,8 @@ public:
 	size_t        length;
 };
 
-extern "C" uint64_t _parseUTF8Character(const char *ch);
+UTF8Character parseUTF8Character(const char *ch);
 size_t getUTF8StringLength(const char *str);
-
-static inline UTF8Character parseUTF8Character(const char *ch) {
-	auto values = _parseUTF8Character(ch);
-
-	return {
-		.codePoint = UTF8CodePoint(values),
-		.length    = size_t(values >> 32)
-	};
-}
 
 /* LZ4 decompressor */
 

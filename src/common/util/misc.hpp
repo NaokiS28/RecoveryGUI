@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "ps1/system.h"
 
 namespace util {
 
@@ -50,91 +49,13 @@ public:
 /* Critical section helper */
 
 class CriticalSection {
-private:
-	bool _enable;
-
 public:
 	inline CriticalSection(void) {
-		_enable = disableInterrupts();
+		// TODO: implement
 	}
 	inline ~CriticalSection(void) {
-		if (_enable)
-			enableInterrupts();
+		// TODO: implement
 	}
-};
-
-class ThreadCriticalSection {
-public:
-	inline ThreadCriticalSection(void) {
-		bool enable = disableInterrupts();
-
-		//assert(enable);
-		(void) enable;
-	}
-	inline ~ThreadCriticalSection(void) {
-		enableInterrupts();
-	}
-};
-
-/* PS1 executable loader */
-
-static constexpr size_t EXECUTABLE_BODY_OFFSET = 2048;
-static constexpr size_t MAX_EXECUTABLE_ARGS    = 32;
-
-class ExecutableHeader {
-public:
-	uint32_t magic[4];
-
-	uint32_t entryPoint, initialGP;
-	uint32_t textOffset, textLength;
-	uint32_t dataOffset, dataLength;
-	uint32_t bssOffset, bssLength;
-	uint32_t stackOffset, stackLength;
-	uint32_t _reserved[5];
-
-	inline void *getEntryPoint(void) const {
-		return reinterpret_cast<void *>(entryPoint);
-	}
-	inline void *getInitialGP(void) const {
-		return reinterpret_cast<void *>(initialGP);
-	}
-	inline void *getTextPtr(void) const {
-		return reinterpret_cast<void *>(textOffset);
-	}
-	inline void *getStackPtr(void) const {
-		return reinterpret_cast<void *>(stackOffset + stackLength);
-	}
-	inline const char *getRegionString(void) const {
-		return reinterpret_cast<const char *>(this + 1);
-	}
-	inline void relocateText(const void *source) const {
-		__builtin_memcpy(getTextPtr(), source, textLength);
-	}
-
-	bool validateMagic(void) const;
-};
-
-class ExecutableLoader {
-private:
-	void *_entryPoint, *_initialGP;
-
-	size_t     _numArgs;
-	const char **_argListPtr;
-	char       *_currentStackPtr;
-
-public:
-	inline bool copyArgument(const char *arg) {
-		return copyArgument(arg, __builtin_strlen(arg));
-	}
-	[[noreturn]] inline void run(void) {
-		run(_numArgs, _argListPtr);
-	}
-
-	ExecutableLoader(void *entryPoint, void *initialGP, void *stackTop);
-	bool addArgument(const char *arg);
-	bool copyArgument(const char *arg, size_t length);
-	bool formatArgument(const char *format, ...);
-	[[noreturn]] void run(int rawArgc, const char *const *rawArgv);
 };
 
 }

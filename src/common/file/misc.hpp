@@ -18,20 +18,20 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "common/file/file.hpp"
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
-#include "ps1/pcdrv.h"
 
 namespace file {
 
-/* PCDRV driver */
+/* Host file driver */
 
 class HostFile : public File {
 	friend class HostProvider;
 
 private:
-	int _fd;
+	FILE *_fd;
 
 public:
 	size_t read(void *output, size_t length);
@@ -43,10 +43,6 @@ public:
 
 class HostDirectory : public Directory {
 	friend class HostProvider;
-
-private:
-	int           _fd;
-	PCDRVDirEntry _entry;
 
 public:
 	bool getEntry(FileInfo &output);

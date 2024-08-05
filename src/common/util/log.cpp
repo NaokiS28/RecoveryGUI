@@ -44,17 +44,6 @@ void Logger::setLogBuffer(LogBuffer *buffer) {
 	_buffer = buffer;
 }
 
-void Logger::setupSyslog(int baudRate) {
-	CriticalSection sec;
-
-	if (baudRate) {
-		initSerialIO(baudRate);
-		_enableSyslog = true;
-	} else {
-		_enableSyslog = false;
-	}
-}
-
 void Logger::log(const char *format, ...) {
 	CriticalSection sec;
 

@@ -112,6 +112,10 @@ size_t encodeBase41(char *output, const uint8_t *input, size_t length) {
 
 /* UTF-8 parser */
 
+UTF8Character parseUTF8Character(const char *ch) {
+	// TODO: implement
+}
+
 size_t getUTF8StringLength(const char *str) {
 	for (size_t length = 0;; length++) {
 		auto value = parseUTF8Character(str);
