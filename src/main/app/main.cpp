@@ -15,7 +15,8 @@
  */
 
 #include <stdio.h>
-#include "common/util.hpp"
+#include "common/util/hash.hpp"
+#include "common/util/templates.hpp"
 #include "main/app/app.hpp"
 #include "main/app/main.hpp"
 #include "main/uibase.hpp"
@@ -180,6 +181,12 @@ static const MenuEntry _MENU_ENTRIES[]{
 		.name   = "MainMenuScreen.testMenu.name"_h,
 		.prompt = "MainMenuScreen.testMenu.prompt"_h,
 		.target = &MainMenuScreen::testMenu
+#if 0
+	}, {
+		.name   = "MainMenuScreen.setLanguage.name"_h,
+		.prompt = "MainMenuScreen.setLanguage.prompt"_h,
+		.target = &MainMenuScreen::setLanguage
+#endif
 	}, {
 		.name   = "MainMenuScreen.setResolution.name"_h,
 		.prompt = "MainMenuScreen.setResolution.prompt"_h,
@@ -244,6 +251,10 @@ void MainMenuScreen::setRTCTime(ui::Context &ctx) {
 
 void MainMenuScreen::testMenu(ui::Context &ctx) {
 	ctx.show(APP->_testMenuScreen, false, true);
+}
+
+void MainMenuScreen::setLanguage(ui::Context &ctx) {
+	ctx.show(APP->_languageScreen, false, true);
 }
 
 void MainMenuScreen::setResolution(ui::Context &ctx) {

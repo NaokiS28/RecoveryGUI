@@ -18,9 +18,10 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "common/util/hash.hpp"
+#include "common/util/templates.hpp"
 #include "common/gpu.hpp"
 #include "common/spu.hpp"
-#include "common/util.hpp"
 
 namespace file {
 
@@ -158,7 +159,7 @@ public:
 
 /* String table parser */
 
-static constexpr int TABLE_BUCKET_COUNT = 256;
+static constexpr size_t STRING_TABLE_BUCKET_COUNT = 256;
 
 struct StringTableEntry {
 public:

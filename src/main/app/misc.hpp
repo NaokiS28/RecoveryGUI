@@ -17,8 +17,8 @@
 #pragma once
 
 #include <stdint.h>
+#include "common/util/templates.hpp"
 #include "common/spu.hpp"
-#include "common/util.hpp"
 #include "main/uibase.hpp"
 #include "main/uicommon.hpp"
 #include "main/uimodals.hpp"
@@ -37,6 +37,15 @@ public:
 /* Misc. screens */
 
 class RTCTimeScreen : public ui::DateEntryScreen {
+public:
+	void show(ui::Context &ctx, bool goBack = false);
+	void update(ui::Context &ctx);
+};
+
+class LanguageScreen : public ui::ListScreen {
+protected:
+	const char *_getItemName(ui::Context &ctx, int index) const;
+
 public:
 	void show(ui::Context &ctx, bool goBack = false);
 	void update(ui::Context &ctx);

@@ -87,7 +87,7 @@ target_compile_definitions(
 )
 link_libraries(common)
 
-function(addExecutable name address stackTop)
+function(addPS1Executable name address stackTop)
 	add_executable(${name} ${ARGN})
 	target_link_options(${name} PRIVATE -Ttext=0x${address})
 
@@ -110,13 +110,19 @@ endfunction()
 # IMPORTANT: these addresses assume the boot executable's size (including code,
 # heap and stack allocations as well as the resource archive) is <576 KB
 # (0x90000 bytes).
-addExecutable(
+addPS1Executable(
 	main 800a0000 801dfff0
 	src/common/file/fat.cpp
 	src/common/file/file.cpp
 	src/common/file/iso9660.cpp
 	src/common/file/misc.cpp
 	src/common/file/zip.cpp
+	src/common/util/hash.cpp
+	src/common/util/log.cpp
+	src/common/util/misc.cpp
+	src/common/util/string.cpp
+	src/common/util/string.s
+	src/common/util/tween.cpp
 	src/common/args.cpp
 	src/common/gpu.cpp
 	src/common/gpufont.cpp
@@ -126,7 +132,6 @@ addExecutable(
 	src/common/rom.cpp
 	src/common/romdrivers.cpp
 	src/common/spu.cpp
-	src/common/util.cpp
 	src/libc/crt0.c
 	src/main/app/app.cpp
 	src/main/app/cartactions.cpp
@@ -188,16 +193,18 @@ target_compile_definitions(
 	$<$<CONFIG:Debug>:
 		#ENABLE_ARGV=1
 		#ENABLE_LOGGING=1
+		NDEBUG=1
 	>
 )
 
 function(addLauncher address stackTop)
-	addExecutable(
+addPS1Executable(
 		launcher${address} ${address} ${stackTop}
+		src/common/util/hash.cpp
+		src/common/util/misc.cpp
 		src/common/args.cpp
 		src/common/ide.cpp
 		src/common/io.cpp
-		src/common/util.cpp
 		src/launcher/main.cpp
 		src/libc/crt0.c
 		src/vendor/printf.c
@@ -213,6 +220,8 @@ addLauncher(803fd000 803ffff0)
 
 ## Boot stub and resource archive
 
+file(GLOB_RECURSE assetList RELATIVE "${PROJECT_SOURCE_DIR}" assets/* )
+
 configure_file(assets/about.txt about.txt NEWLINE_STYLE LF)
 
 function(addBootStub name resourceName)
@@ -227,8 +236,7 @@ function(addBootStub name resourceName)
 		OUTPUT  ${resourceName}.zip
 		DEPENDS
 			${resourceName}.json
-			assets/app.palette.json
-			assets/app.strings.json
+			${assetList}
 			main.psexe
 			launcher801fd000.psexe
 			launcher803fd000.psexe
@@ -236,12 +244,13 @@ function(addBootStub name resourceName)
 		VERBATIM
 	)
 
-	addExecutable(
+	addPS1Executable(
 		${name} 80010000 0
 		src/boot/crt0.s
 		src/boot/main.cpp
+		src/common/util/misc.cpp
+		src/common/util/string.cpp
 		src/common/io.cpp
-		src/common/util.cpp
 	)
 	addBinaryFile(
 		${name} _resourceArchive _resourceArchiveLength

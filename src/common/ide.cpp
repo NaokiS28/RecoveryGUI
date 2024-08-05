@@ -16,10 +16,11 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "common/util/log.hpp"
+#include "common/util/templates.hpp"
 #include "common/ide.hpp"
 #include "common/idedefs.hpp"
 #include "common/io.hpp"
-#include "common/util.hpp"
 #include "ps1/registers573.h"
 #include "ps1/system.h"
 
@@ -71,7 +72,6 @@ const char *const DEVICE_ERROR_NAMES[]{
 
 /* Utilities */
 
-#ifdef ENABLE_FULL_IDE_DRIVER
 static void _copyString(char *output, const uint16_t *input, size_t length) {
 	// The strings in the identification block are byte-swapped and padded with
 	// spaces. To make them printable, any span of consecutive space characters
@@ -99,7 +99,6 @@ static void _copyString(char *output, const uint16_t *input, size_t length) {
 		*(--output) = b;
 	}
 }
-#endif
 
 static DeviceError _senseDataToError(const SenseData &data) {
 	auto key = data.senseKey & 15;
@@ -727,6 +726,10 @@ DeviceError Device::poll(void) {
 	}
 }
 
+void Device::handleInterrupt(void) {
+	// TODO: use interrupts to yield instead of busy waiting
+}
+
 DeviceError Device::readData(void *data, uint64_t lba, size_t count) {
 	util::assertAligned<uint32_t>(data);
 
@@ -753,6 +756,8 @@ DeviceError Device::writeData(const void *data, uint64_t lba, size_t count) {
 
 	return _ataTransfer(reinterpret_cast<uintptr_t>(data), lba, count, true);
 }
+
+#ifdef ENABLE_FULL_IDE_DRIVER
 
 DeviceError Device::goIdle(bool standby) {
 	if (!(flags & DEVICE_READY))
@@ -806,5 +811,7 @@ DeviceError Device::flushCache(void) {
 	);
 	return _waitForIdle();
 }
+
+#endif
 
 }

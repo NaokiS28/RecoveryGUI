@@ -19,8 +19,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "common/file/file.hpp"
+#include "common/util/hash.hpp"
+#include "common/util/templates.hpp"
 #include "common/gpu.hpp"
-#include "common/util.hpp"
 
 namespace file {
 
@@ -243,20 +244,17 @@ const char *StringTable::get(util::Hash id) const {
 	if (!ptr)
 		return _ERROR_STRING;
 
-	auto blob  = reinterpret_cast<const char *>(ptr);
-	auto table = reinterpret_cast<const StringTableEntry *>(ptr);
+	auto blob  = as<const char>();
+	auto table = as<const StringTableEntry>();
+	auto index = id % STRING_TABLE_BUCKET_COUNT;
 
-	auto entry = &table[id % TABLE_BUCKET_COUNT];
-
-	if (entry->hash == id)
-		return &blob[entry->offset];
-
-	while (entry->chained) {
-		entry = &table[entry->chained];
+	do {
+		auto entry = &table[index];
+		index      = entry->chained;
 
 		if (entry->hash == id)
 			return &blob[entry->offset];
-	}
+	} while (index);
 
 	return _ERROR_STRING;
 }

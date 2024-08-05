@@ -15,8 +15,11 @@
  */
 
 #include <stdint.h>
+#include "common/util/log.hpp"
+#include "common/util/misc.hpp"
+#include "common/util/string.hpp"
+#include "common/util/templates.hpp"
 #include "common/io.hpp"
-#include "common/util.hpp"
 #include "main/cart/cart.hpp"
 #include "main/cart/cartio.hpp"
 #include "main/cart/zs01.hpp"
@@ -149,12 +152,9 @@ static constexpr int _ZS01_SEND_DELAY   = 100000;
 static constexpr int _ZS01_PACKET_DELAY = 300000;
 
 DriverError CartDriver::readSystemID(void) {
-	auto enable = disableInterrupts();
+	util::CriticalSection sec;
 
 	if (!io::digitalIODS2401.reset()) {
-		if (enable)
-			enableInterrupts();
-
 		LOG_CART_IO("no 1-wire device found");
 		return DS2401_NO_RESP;
 	}
@@ -165,8 +165,6 @@ DriverError CartDriver::readSystemID(void) {
 	for (int i = 0; i < 8; i++)
 		_dump.systemID.data[i] = io::digitalIODS2401.readByte();
 
-	if (enable)
-		enableInterrupts();
 	if (!_dump.systemID.validateDSCRC())
 		return DS2401_ID_ERROR;
 
@@ -175,12 +173,9 @@ DriverError CartDriver::readSystemID(void) {
 }
 
 DriverError X76Driver::readCartID(void) {
-	auto enable = disableInterrupts();
+	util::CriticalSection sec;
 
 	if (!io::cartDS2401.reset()) {
-		if (enable)
-			enableInterrupts();
-
 		LOG_CART_IO("no 1-wire device found");
 		return DS2401_NO_RESP;
 	}
@@ -191,8 +186,6 @@ DriverError X76Driver::readCartID(void) {
 	for (int i = 0; i < 8; i++)
 		_dump.cartID.data[i] = io::cartDS2401.readByte();
 
-	if (enable)
-		enableInterrupts();
 	if (!_dump.cartID.validateDSCRC())
 		return DS2401_ID_ERROR;
 

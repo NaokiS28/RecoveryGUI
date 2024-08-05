@@ -21,12 +21,14 @@
 #include "common/file/iso9660.hpp"
 #include "common/file/misc.hpp"
 #include "common/file/zip.hpp"
+#include "common/util/log.hpp"
+#include "common/util/misc.hpp"
+#include "common/util/templates.hpp"
 #include "common/defs.hpp"
 #include "common/gpu.hpp"
 #include "common/ide.hpp"
 #include "common/io.hpp"
 #include "common/spu.hpp"
-#include "common/util.hpp"
 #include "main/app/app.hpp"
 #include "main/cart/cart.hpp"
 #include "main/uibase.hpp"
@@ -41,40 +43,41 @@ void WorkerStatus::reset(ui::Screen &next, bool goBack) {
 	message       = nullptr;
 	nextScreen    = &next;
 	nextGoBack    = goBack;
+
+	flushWriteQueue();
 }
 
 void WorkerStatus::update(int part, int total, const char *text) {
-	auto enable   = disableInterrupts();
+	util::CriticalSection sec;
+
 	status        = WORKER_BUSY;
 	progress      = part;
 	progressTotal = total;
 
 	if (text)
 		message = text;
-	if (enable)
-		enableInterrupts();
+
+	flushWriteQueue();
 }
 
 ui::Screen &WorkerStatus::setNextScreen(ui::Screen &next, bool goBack) {
-	auto enable  = disableInterrupts();
+	util::CriticalSection sec;
+
 	auto oldNext = nextScreen;
 	nextScreen   = &next;
 	nextGoBack   = goBack;
 
-	if (enable)
-		enableInterrupts();
-
+	flushWriteQueue();
 	return *oldNext;
 }
 
 WorkerStatusType WorkerStatus::setStatus(WorkerStatusType value) {
-	auto enable    = disableInterrupts();
+	util::CriticalSection sec;
+
 	auto oldStatus = status;
 	status         = value;
 
-	if (enable)
-		enableInterrupts();
-
+	flushWriteQueue();
 	return oldStatus;
 }
 
@@ -219,7 +222,10 @@ void App::_setupInterrupts(void) {
 		util::forcedCast<ArgFunction>(&App::_interruptHandler), this
 	);
 
-	IRQ_MASK = 1 << IRQ_VSYNC;
+	IRQ_MASK = 0
+		| (1 << IRQ_VSYNC)
+		| (1 << IRQ_SPU)
+		| (1 << IRQ_PIO);
 	enableInterrupts();
 }
 
@@ -237,12 +243,12 @@ static const char *const _UI_SOUND_PATHS[ui::NUM_UI_SOUNDS]{
 void App::_loadResources(void) {
 	auto &res = _fileIO.resource;
 
+	res.loadStruct(_ctx.colors,       "assets/palette.dat");
 	res.loadTIM(_background.tile,     "assets/textures/background.tim");
 	res.loadTIM(_ctx.font.image,      "assets/textures/font.tim");
-	res.loadStruct(_ctx.font.metrics, "assets/textures/font.metrics");
+	res.loadData(_ctx.font.metrics,   "assets/textures/font.metrics");
 	res.loadTIM(_splashOverlay.image, "assets/textures/splash.tim");
-	res.loadStruct(_ctx.colors,       "assets/app.palette");
-	res.loadData(_stringTable,        "assets/app.strings");
+	res.loadData(_stringTable,        "assets/lang/en.lang");
 
 	file::currentSPUOffset = spu::DUMMY_BLOCK_END;
 
@@ -319,7 +325,9 @@ void App::_updateOverlays(void) {
 	// Splash screen overlay
 	int timeout = _ctx.gpuCtx.refreshRate * _SPLASH_SCREEN_TIMEOUT;
 
-	if ((_workerStatus.status == WORKER_DONE) || (_ctx.time > timeout))
+	__atomic_signal_fence(__ATOMIC_ACQUIRE);
+
+	if ((_workerStatus.status != WORKER_BUSY) || (_ctx.time > timeout))
 		_splashOverlay.hide(_ctx);
 
 	// Log overlay
@@ -339,20 +347,20 @@ void App::_updateOverlays(void) {
 void App::_runWorker(
 	bool (App::*func)(void), ui::Screen &next, bool goBack, bool playSound
 ) {
-	auto enable = disableInterrupts();
+	{
+		util::CriticalSection sec;
 
-	_workerStatus.reset(next, goBack);
-	_workerStack.allocate(_WORKER_STACK_SIZE);
+		_workerStatus.reset(next, goBack);
+		_workerStack.allocate(_WORKER_STACK_SIZE);
 
-	_workerFunction  = func;
-	auto stackBottom = _workerStack.as<uint8_t>();
+		_workerFunction  = func;
+		auto stackBottom = _workerStack.as<uint8_t>();
 
-	initThread(
-		&_workerThread, util::forcedCast<ArgFunction>(&App::_worker), this,
-		&stackBottom[(_WORKER_STACK_SIZE - 1) & ~7]
-	);
-	if (enable)
-		enableInterrupts();
+		initThread(
+			&_workerThread, util::forcedCast<ArgFunction>(&App::_worker), this,
+			&stackBottom[(_WORKER_STACK_SIZE - 1) & ~7]
+		);
+	}
 
 	_ctx.show(_workerStatusScreen, false, playSound);
 }
@@ -372,10 +380,20 @@ void App::_interruptHandler(void) {
 	if (acknowledgeInterrupt(IRQ_VSYNC)) {
 		_ctx.tick();
 
+		__atomic_signal_fence(__ATOMIC_ACQUIRE);
+
 		if (_workerStatus.status != WORKER_REBOOT)
 			io::clearWatchdog();
 		if (gpu::isIdle() && (_workerStatus.status != WORKER_BUSY_SUSPEND))
 			switchThread(nullptr);
+	}
+
+	if (acknowledgeInterrupt(IRQ_SPU))
+		_ctx.audioStream.handleInterrupt();
+
+	if (acknowledgeInterrupt(IRQ_PIO)) {
+		for (auto &dev : ide::devices)
+			dev.handleInterrupt();
 	}
 }
 

@@ -20,6 +20,8 @@
 #include "common/file/file.hpp"
 #include "common/file/misc.hpp"
 #include "common/file/zip.hpp"
+#include "common/util/log.hpp"
+#include "common/util/templates.hpp"
 #include "common/ide.hpp"
 #include "main/app/cartactions.hpp"
 #include "main/app/cartunlock.hpp"
@@ -48,13 +50,12 @@ enum WorkerStatusType {
 // the main thread and the WorkerStatusScreen.
 class WorkerStatus {
 public:
-	volatile WorkerStatusType status;
+	WorkerStatusType status;
+	int              progress, progressTotal;
 
-	volatile int progress, progressTotal;
-
-	const char *volatile message;
-	ui::Screen *volatile nextScreen;
-	volatile bool        nextGoBack;
+	const char *message;
+	ui::Screen *nextScreen;
+	bool       nextGoBack;
 
 	void reset(ui::Screen &next, bool goBack = false);
 	void update(int part, int total, const char *text = nullptr);
@@ -132,6 +133,7 @@ class App {
 
 	friend class IDEInfoScreen;
 	friend class RTCTimeScreen;
+	friend class LanguageScreen;
 	friend class ResolutionScreen;
 	friend class AboutScreen;
 
@@ -177,6 +179,7 @@ private:
 	// misc.cpp
 	IDEInfoScreen    _ideInfoScreen;
 	RTCTimeScreen    _rtcTimeScreen;
+	LanguageScreen   _languageScreen;
 	ResolutionScreen _resolutionScreen;
 	AboutScreen      _aboutScreen;
 
