@@ -65,10 +65,17 @@ target_compile_options(
 		-Wno-pmf-conversions
 	>
 )
+target_compile_features(
+	main PRIVATE
+	cxx_std_20
+)
 target_compile_definitions(
 	main PRIVATE
 	VERSION="${PROJECT_VERSION}"
 	EXTERNAL_DATA_DIR="hdd:/${PROJECT_NAME}"
+	ENABLE_APP_LOGGING=1
+	ENABLE_FS_LOGGING=1
+	ENABLE_LOG_BUFFER=1
 )
 
 ## Resource archive
@@ -95,3 +102,6 @@ endfunction()
 
 configure_file(assets/about.txt about.txt NEWLINE_STYLE LF)
 addResourceArchive(resources.json resources.zip)
+
+# Ensure the resource archive actually gets built.
+add_custom_target(resources ALL DEPENDS resources.zip)

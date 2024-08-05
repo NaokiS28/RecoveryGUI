@@ -44,6 +44,8 @@ public:
 	int getMonthDayCount(void) const;
 	uint32_t toDOSTime(void) const;
 	size_t toString(char *output) const;
+
+	void fromCurrentTime(void);
 };
 
 /* Critical section helper */

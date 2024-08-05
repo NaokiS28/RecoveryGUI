@@ -39,28 +39,11 @@ void Context::setResolution(int _width, int _height) {
 
 	// TODO: implement
 
-	_currentListPtr = _buffers[0].displayList;
-	_currentBuffer  = 0;
-
+	_currentBuffer = 0;
 	flip();
 }
 
-uint32_t *Context::newPacket(size_t length) {
-	auto ptr        = _currentListPtr;
-	_currentListPtr = &ptr[length + 1];
-
-	//assert(_currentListPtr <= &_drawBuffer().displayList[DISPLAY_LIST_SIZE]);
-
-	// TODO: implement
-	return ptr;
-}
-
 void Context::newLayer(int x, int y, int drawWidth, int drawHeight) {
-	auto &clip = _drawBuffer().clip;
-
-	x += clip.x1;
-	y += clip.y1;
-
 	// TODO: implement
 }
 

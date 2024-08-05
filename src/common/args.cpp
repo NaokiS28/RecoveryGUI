@@ -29,7 +29,7 @@ static constexpr char _VALUE_SEPARATOR = '=';
 static constexpr int _DEFAULT_SCREEN_WIDTH  = 320;
 static constexpr int _DEFAULT_SCREEN_HEIGHT = 240;
 
-static const char _DEFAULT_RESOURCE_PATH[]{ "resources.zip" };
+static const char _DEFAULT_RESOURCE_PATH[]{ "host:./resources.zip" };
 
 MainArgs::MainArgs(void)
 : screenWidth(_DEFAULT_SCREEN_WIDTH), screenHeight(_DEFAULT_SCREEN_HEIGHT),

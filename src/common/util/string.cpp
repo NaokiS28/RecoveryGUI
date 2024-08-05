@@ -14,6 +14,7 @@
  * 573in1. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <bit>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -113,7 +114,25 @@ size_t encodeBase41(char *output, const uint8_t *input, size_t length) {
 /* UTF-8 parser */
 
 UTF8Character parseUTF8Character(const char *ch) {
-	// TODO: implement
+	uint8_t codePoint = *(ch++);
+
+	if (!(codePoint >> 7))
+		return { codePoint, 1 };
+
+	size_t length = std::countl_one(codePoint);
+	codePoint    &= (1 << (7 - length)) - 1;
+
+	for (int i = length - 1; i > 0; i--) {
+		uint8_t contByte = *(ch++);
+
+		if ((contByte & 0xc0) != 0x80)
+			return { codePoint, 0 };
+
+		codePoint <<= 6;
+		codePoint  |= contByte & 0x3f;
+	}
+
+	return { codePoint, length };
 }
 
 size_t getUTF8StringLength(const char *str) {

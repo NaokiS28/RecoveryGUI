@@ -69,15 +69,13 @@ static constexpr size_t LAYER_STACK_SIZE  = 16;
 
 struct Buffer {
 public:
-	Rect     clip;
-	uint32_t displayList[DISPLAY_LIST_SIZE];
+	// TODO: implement
 };
 
 class Context {
 private:
-	Buffer   _buffers[2];
-	uint32_t *_currentListPtr;
-	int      _currentBuffer;
+	Buffer _buffers[2];
+	int    _currentBuffer;
 
 	uint32_t _lastTexpage;
 
@@ -94,14 +92,6 @@ public:
 	inline Context(int width, int height)
 	: _lastTexpage(0) {
 		setResolution(width, height);
-	}
-	inline void getVRAMClipRect(RectWH &output) const {
-		auto &clip = _buffers[_currentBuffer ^ 1].clip;
-
-		output.x = clip.x1;
-		output.y = clip.y1;
-		output.w = width;
-		output.h = height;
 	}
 
 	inline void newLayer(int x, int y) {
@@ -140,7 +130,6 @@ public:
 	void setResolution(int width, int height);
 	void flip(void);
 
-	uint32_t *newPacket(size_t length);
 	void newLayer(int x, int y, int drawWidth, int drawHeight);
 	void setTexturePage(uint16_t page, bool dither = false);
 	void setBlendMode(BlendMode blendMode, bool dither = false);

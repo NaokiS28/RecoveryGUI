@@ -26,8 +26,8 @@ int main(int argc, const char **argv) {
 
 	args::MainArgs args;
 
-	for (; argc > 0; argc--)
-		args.parseArgument(*(argv++));
+	for (; argc > 1; argc--)
+		args.parseArgument(*(++argv));
 
 	if (!args.resourcePath) {
 		LOG_APP("required arguments missing");

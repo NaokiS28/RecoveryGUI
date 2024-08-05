@@ -69,8 +69,6 @@ void FileIOManager::closeResourceFile(void) {
 
 /* App class */
 
-static constexpr size_t _WORKER_STACK_SIZE = 0x20000;
-
 static constexpr int _SPLASH_SCREEN_TIMEOUT = 5;
 
 App::App(ui::Context &ctx)
@@ -135,7 +133,7 @@ void App::_updateOverlays(void) {
 	static char dateString[24];
 	util::Date  date;
 
-	//io::getRTCTime(date);
+	date.fromCurrentTime();
 	date.toString(dateString);
 
 	_textOverlay.leftText = dateString;

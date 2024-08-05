@@ -17,6 +17,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 #include "common/util/hash.hpp"
 #include "common/util/misc.hpp"
 #include "common/util/templates.hpp"
@@ -111,6 +112,20 @@ size_t Date::toString(char *output) const {
 		output, "%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute,
 		second
 	);
+}
+
+void Date::fromCurrentTime(void) {
+	auto timeValue = time(nullptr);
+	tm   timeObj;
+
+	localtime_s(&timeObj, &timeValue);
+
+	year   = timeObj.tm_year + 1900;
+	month  = timeObj.tm_mon  + 1;
+	day    = timeObj.tm_mday;
+	hour   = timeObj.tm_hour;
+	minute = timeObj.tm_min;
+	second = timeObj.tm_sec;
 }
 
 }
