@@ -18,10 +18,10 @@
 #include "common/util/log.hpp"
 #include "common/util/vesa.hpp"
 #include "common/args.hpp"
-#include "common/gpu.hpp"
 #include "main/app/app.hpp"
 #include "main/uibase.hpp"
-#include "common/windowproc.hpp"
+#include "hw/gpu.hpp"
+#include "hw/windowproc.hpp"
 
 int main(int argc, const char **argv)
 {

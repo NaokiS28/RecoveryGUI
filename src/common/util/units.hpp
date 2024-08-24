@@ -18,8 +18,8 @@
 
 #include <string>
 #include <cstring>
-#include "../../common/gpufont.hpp"
-#include "../../common/gpu.hpp"
+#include "hw/gpufont.hpp"
+#include "hw/gpu.hpp"
 
 /* Todo list:
     [ ] - Get relative units. Need font size, object size etc.

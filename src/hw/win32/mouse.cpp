@@ -14,9 +14,6 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdint.h>
-#include <windows.h>
 #include "mouse.hpp"
 
 int MouseHandler::init()

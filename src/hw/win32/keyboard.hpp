@@ -14,49 +14,31 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
 #include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
-#include "io.hpp"
-#include "keyboard.hpp"
+#include "common/iohandler.hpp"
 
-int KeyboardHandler::init()
-{
-    return 0;
-}
+/*
+    Todo:
+    [ ] - Process all important messages
+    [ ] - Create virtual inputs from keyboard
+    [ ] - Multiple keyboard support? (Requires Raw Input, unlikely to happen)
+*/
 
-int KeyboardHandler::update()
+class KeyboardHandler : public InputHandler
 {
-    return 0;
-}
+private:
 
-int KeyboardHandler::getInputs(DeviceInputs &dev)
-{
-    return 0;
-}
 
-void KeyboardHandler::processKeyDown(WPARAM p)
-{
-    // int doSomething;
-}
-
-void KeyboardHandler::processKeyUp(WPARAM p)
-{
-}
-
-int KeyboardHandler::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_KEYUP:
-    {
-        return 0;
-    }
-    case WM_KEYDOWN:
-    {
-        return 0;
-    }
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
-}
+public:
+    KeyboardHandler(){}
+    void processKeyDown(WPARAM p);
+    void processKeyUp(WPARAM p);
+    int init();
+    int update();
+    int getInputs(DeviceInputs &dev);
+    int processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+};

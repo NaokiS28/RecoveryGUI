@@ -19,8 +19,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
-#include "virtualio.hpp"
-#include "iohandler.hpp"
+#include "common/virtualio.hpp"
+#include "common/iohandler.hpp"
 
 using namespace VirtualIO;
 

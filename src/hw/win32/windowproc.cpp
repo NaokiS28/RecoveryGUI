@@ -14,10 +14,7 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#include "main/uibase.hpp"
 #include "windowproc.hpp"
-#include <windows.h>
 
 namespace win
 {

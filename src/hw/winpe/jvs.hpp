@@ -14,31 +14,20 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <stddef.h>
-#include <stdint.h>
-#include <windows.h>
-#include "iohandler.hpp"
-
 /*
-    Todo:
-    [ ] - Process all important messages
-    [ ] - Create virtual inputs from keyboard
-    [ ] - Multiple keyboard support? (Requires Raw Input, unlikely to happen)
+    Notes:
+        WinPE does not support serial ports, JVS cannot be used
 */
 
-class KeyboardHandler : public InputHandler
+#pragma once
+#include "common/iohandler.hpp"
+
+class JVSHandler : public InputHandler
 {
-private:
-
-
 public:
-    KeyboardHandler(){}
-    void processKeyDown(WPARAM p);
-    void processKeyUp(WPARAM p);
-    int init();
-    int update();
-    int getInputs(DeviceInputs &dev);
-    int processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    JVSHandler(const char* port = nullptr) { }
+    int init() { return 0; }
+    int isReady(){ return 0; }
+    int update() { return 0; }
+    //int getInputs(DeviceInputs &dev);
 };

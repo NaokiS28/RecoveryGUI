@@ -14,12 +14,6 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdint.h>
-#include <cstdio>
-#include <windows.h>
-#include "io.hpp"
-#include "util/log.hpp"
 #include "jvs.hpp"
 
 int findComPorts(char *foundComList, uint8_t &foundComSize, uint8_t maxSize = 50)

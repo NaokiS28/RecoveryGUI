@@ -14,16 +14,7 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <windows.h>
-#include <wingdi.h>
-#include <winuser.h>
-
-#include "targetver.h"
-#include "common/util/misc.hpp"
-#include "common/gpu.hpp"
+#include "gpu.hpp"
 
 namespace gpu
 {

@@ -29,8 +29,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
-#include "iohandler.hpp"
-#include "util/log.hpp"
+#include "common/iohandler.hpp"
+#include "common/virtualio.hpp"
+#include "common/util/log.hpp"
 
 class JoystickDevice
 {

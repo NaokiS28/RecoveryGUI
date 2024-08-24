@@ -19,8 +19,8 @@
 #include "common/util/templates.hpp"
 #include "common/util/tween.hpp"
 #include "common/util/units.hpp"
-#include "common/gpu.hpp"
-#include "common/gpufont.hpp"
+#include "hw/gpu.hpp"
+#include "hw/gpufont.hpp"
 #include "main/uibase.hpp"
 
 namespace ui

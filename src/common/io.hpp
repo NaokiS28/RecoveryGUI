@@ -23,10 +23,10 @@
 #include "util/log.hpp"
 #include "virtualio.hpp"
 #include "iohandler.hpp"
-#include "keyboard.hpp"
-#include "joystick.hpp"
-#include "mouse.hpp"
-#include "jvs.hpp"
+#include "hw/keyboard.hpp"
+#include "hw/joystick.hpp"
+#include "hw/mouse.hpp"
+#include "hw/jvs.hpp"
 
 /*
     IO overview:

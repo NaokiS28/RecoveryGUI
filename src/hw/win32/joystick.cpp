@@ -14,11 +14,6 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdint.h>
-#include <windows.h>
-#include "io.hpp"
-#include "util/log.hpp"
 #include "joystick.hpp"
 
 int JoystickHandler::init()
@@ -73,15 +68,15 @@ int JoystickHandler::update()
 int16_t JoystickHandler::getInput(uint32_t code)
 {
     // Todo
-    uint8_t id = getInputDevId(code);
-    uint8_t InputType = getInputType(code);
-    uint8_t inputIdx = getInputIdx(code);
+    uint8_t id = VirtualIO::getInputDevId(code);
+    uint8_t InputType = VirtualIO::getInputType(code);
+    uint8_t inputIdx = VirtualIO::getInputIdx(code);
 
     if(id > (joystickCount - 1)){
-        return INPUT_STATE_INACTIVE;
+        return VirtualIO::INPUT_STATE_INACTIVE;
     }
 
-    if(InputType == INPUT_TYPE_ANALOG){
+    if(InputType == VirtualIO::INPUT_TYPE_ANALOG){
         int16_t val = 0x0000;
         switch(inputIdx){
             case 0: val = joystickList[id].state.dwXpos; break;
@@ -94,7 +89,7 @@ int16_t JoystickHandler::getInput(uint32_t code)
         }
         return val;
     }
-    else if(InputType == INPUT_TYPE_DIGITAL){
+    else if(InputType == VirtualIO::INPUT_TYPE_DIGITAL){
         return ((joystickList[id].getInputs() >> inputIdx) & 0x1 ? 0x7FFF : 0x0000);
     }
     return 0;

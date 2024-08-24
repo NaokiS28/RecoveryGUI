@@ -16,10 +16,10 @@
 
 #pragma once
 
+#include <windows.h>
 #include <stdint.h>
 #include "main/uibase.hpp"
-#include <windows.h>
-#include "../resources.h"
+#include "resources.h"
 
 namespace win
 {

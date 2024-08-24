@@ -21,7 +21,7 @@
 #include <cctype>
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
-#include "common/gpu.hpp"
+#include "hw/gpu.hpp"
 #include "common/io.hpp"
 
 namespace file {

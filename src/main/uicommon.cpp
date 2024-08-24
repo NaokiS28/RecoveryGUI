@@ -16,7 +16,7 @@
 
 #include "common/util/templates.hpp"
 #include "common/defs.hpp"
-#include "common/gpu.hpp"
+#include "hw/gpu.hpp"
 #include "main/uibase.hpp"
 #include "main/uicommon.hpp"
 

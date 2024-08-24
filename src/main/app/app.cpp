@@ -23,10 +23,8 @@
 #include "common/util/misc.hpp"
 #include "common/util/templates.hpp"
 #include "common/defs.hpp"
-#include "common/gpu.hpp"
+#include "hw/gpu.hpp"
 #include "main/app/app.hpp"
-#include "main/uibase.hpp"
-#include "common/virtualio.hpp"
 
 /* Filesystem manager class */
 

@@ -14,10 +14,8 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#include "common/util/string.hpp"
-#include "common/gpu.hpp"
-#include "common/gpufont.hpp"
+
+#include "gpufont.hpp"
 
 namespace gpu
 {

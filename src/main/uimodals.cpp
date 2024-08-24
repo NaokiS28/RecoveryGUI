@@ -20,7 +20,7 @@
 #include "common/util/string.hpp"
 #include "common/util/templates.hpp"
 #include "common/util/tween.hpp"
-#include "common/gpu.hpp"
+#include "hw/gpu.hpp"
 #include "main/uibase.hpp"
 #include "main/uimodals.hpp"
 

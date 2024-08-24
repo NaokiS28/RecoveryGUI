@@ -18,11 +18,11 @@
 #include <vector>
 #include "file/file.hpp"
 #include "util/log.hpp"
-#include "keyboard.hpp"
-#include "joystick.hpp"
-#include "mouse.hpp"
-#include "jvs.hpp"
-#include "io.hpp"
+#include "common/io.hpp"
+#include "hw/keyboard.hpp"
+#include "hw/joystick.hpp"
+#include "hw/mouse.hpp"
+#include "hw/jvs.hpp"
 
 namespace io
 {

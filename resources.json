@@ -8,6 +8,66 @@
 			"source": "${PROJECT_SOURCE_DIR}/assets/lang/en.json"
 		},
 		{
+			"type":     "binary",
+			"name":     "assets/sounds/about.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/about.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/alert.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/alert.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/click.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/click.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/enter.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/enter.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/exit.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/exit.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/move.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/move.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/screenshot.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/screenshot.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/sounds/startup.wav",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/sounds/startup.wav"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/textures/cursor.png",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/textures/cursor.png"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/textures/background.png",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/textures/background.png"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/textures/font.png",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/textures/font.png"
+		},
+		{
+			"type":     "binary",
+			"name":     "assets/textures/splash.png",
+			"source":   "${PROJECT_SOURCE_DIR}/assets/textures/splash.png"
+		},
+		{
 			"type":     "tim",
 			"name":     "assets/textures/background.tim",
 			"source":   "${PROJECT_SOURCE_DIR}/assets/textures/background.png",

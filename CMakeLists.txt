@@ -32,8 +32,8 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(WIN32)
-    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/icon.rc")
-	set(APP_INFO_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/info.rc")
+    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/hw/win32/icon.rc")
+	set(APP_INFO_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/hw/win32/info.rc")
 	add_executable(
 		main
 		src/common/file/file.cpp
@@ -45,16 +45,16 @@ if(WIN32)
 		src/common/util/string.cpp
 		src/common/util/tween.cpp
 		src/common/args.cpp
-		src/common/gpu.cpp
-		src/common/gpufont.cpp
+		src/hw/win32/gpu.cpp
+		src/hw/win32/gpufont.cpp
 		src/common/io.cpp
-		src/common/joystick.cpp
-		src/common/keyboard.cpp
-		src/common/mouse.cpp
-		src/common/jvs.cpp
+		src/hw/win32/joystick.cpp
+		src/hw/win32/keyboard.cpp
+		src/hw/win32/mouse.cpp
+		src/hw/win32/jvs.cpp
 		src/common/io.cpp
 		src/common/virtualio.cpp
-		src/common/windowproc.cpp
+		src/hw/win32/windowproc.cpp
 		src/main/app/app.cpp
 		src/main/app/mainmenu.cpp
 		src/main/app/modals.cpp

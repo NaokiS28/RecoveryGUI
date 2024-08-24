@@ -20,17 +20,14 @@
 #include "common/util/log.hpp"
 #include "common/util/tween.hpp"
 #include "common/util/units.hpp"
-#include "common/gpu.hpp"
-#include "common/gpufont.hpp"
 #include "common/io.hpp"
-#include <windows.h>
+#include "hw/gpu.hpp"
+#include "hw/gpufont.hpp"
 
 
 namespace ui {
 
 /* Public constants */
-
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 static constexpr int NUM_UI_COLORS = 18;
 

@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include "common/util/string.hpp"
 #include "common/util/templates.hpp"
-#include "common/gpu.hpp"
+#include "gpu.hpp"
 
 namespace gpu {
 

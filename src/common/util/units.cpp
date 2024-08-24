@@ -16,11 +16,7 @@
 
 #pragma once
 
-#include <string>
-#include <cstring>
 #include "units.hpp"
-#include "../../common/gpufont.hpp"
-#include "../../common/gpu.hpp"
 
 /* Todo list:
     [ ] - Get relative units. Need font size, object size etc.

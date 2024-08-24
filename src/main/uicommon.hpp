@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 #include "common/util/tween.hpp"
-#include "common/gpu.hpp"
+#include "hw/gpu.hpp"
 #include "main/uibase.hpp"
 
 namespace ui {
