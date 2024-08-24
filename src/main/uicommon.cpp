@@ -1,17 +1,17 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "common/util/templates.hpp"
@@ -126,7 +126,7 @@ ImageScreen::ImageScreen(void)
 _prompt(nullptr) {}
 
 void ImageScreen::draw(Context &ctx, bool active) const {
-	_newLayer(ctx, 0, 0, ctx.gpuCtx.width, ctx.gpuCtx.height);
+	_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
 
 	int lineHeight = ctx.font.getLineHeight();
 
@@ -196,11 +196,11 @@ void ListScreen::_drawItems(Context &ctx) const {
 		if ((itemY + itemHeight) >= 0) {
 			if (i == _activeItem) {
 				ctx.gpuCtx.drawRect(
-					LIST_BOX_PADDING, itemY, itemWidth, itemHeight,
+					 LIST_BOX_PADDING, itemY, itemWidth, itemHeight,
 					ctx.colors[COLOR_HIGHLIGHT2]
 				);
 				ctx.gpuCtx.drawRect(
-					LIST_BOX_PADDING, itemY, _itemAnim.getValue(ctx.time),
+					 LIST_BOX_PADDING, itemY, _itemAnim.getValue(ctx.time),
 					itemHeight, ctx.colors[COLOR_HIGHLIGHT1]
 				);
 
@@ -231,8 +231,8 @@ void ListScreen::show(Context &ctx, bool goBack) {
 }
 
 void ListScreen::draw(Context &ctx, bool active) const {
-	int screenWidth  = ctx.gpuCtx.width  - SCREEN_MARGIN_X * 2;
-	int screenHeight = ctx.gpuCtx.height - SCREEN_MARGIN_Y * 2;
+	int screenWidth  = ctx.gpuCtx.getHorizontalRes()  - (SCREEN_MARGIN_X * 2);
+	int screenHeight = ctx.gpuCtx.getVerticalRes() - (SCREEN_MARGIN_Y * 2);
 	int listHeight   = _getListHeight(ctx);
 	int lineHeight   = ctx.font.getLineHeight();
 
@@ -251,7 +251,7 @@ void ListScreen::draw(Context &ctx, bool active) const {
 
 	rect.y1 = screenHeight - SCREEN_PROMPT_HEIGHT;
 	rect.y2 = screenHeight;
-	ctx.font.draw(ctx.gpuCtx, _prompt, rect, ctx.colors[COLOR_TEXT1], true);
+	ctx.font.draw(ctx.gpuCtx, _prompt, rect, ctx.colors[COLOR_TEXT1]);
 
 	_newLayer(
 		ctx, SCREEN_MARGIN_X,
@@ -261,12 +261,19 @@ void ListScreen::draw(Context &ctx, bool active) const {
 	_setBlendMode(ctx, gpu::GP0_BLEND_SEMITRANS, true);
 
 	// List box
+	/*
 	ctx.gpuCtx.drawRect(
 		0, 0, screenWidth / 2, listHeight, ctx.colors[COLOR_BOX1]
 	);
 	ctx.gpuCtx.drawGradientRectH(
 		screenWidth / 2, 0, screenWidth / 2, listHeight, ctx.colors[COLOR_BOX1],
 		ctx.colors[COLOR_BOX2]
+	);
+	*/
+	ctx.gpuCtx.drawGradientRectHVar(
+		0, 0, screenWidth, listHeight, 
+		ctx.colors[COLOR_BOX1], ctx.colors[COLOR_BOX2],
+		(screenWidth / 2), screenWidth
 	);
 
 	if (_listLength) {

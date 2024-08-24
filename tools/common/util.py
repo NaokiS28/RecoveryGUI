@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# 573in1 - Copyright (C) 2022-2024 spicyjpeg
+# BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
 #
-# 573in1 is free software: you can redistribute it and/or modify it under the
+# BemaniUX is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+# BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# 573in1. If not, see <https://www.gnu.org/licenses/>.
+# BemaniUX. If not, see <https://www.gnu.org/licenses/>.
 
 import logging, re
 from collections import defaultdict
@@ -40,7 +40,7 @@ def decodeSigned(value: int, bitLength: int) -> int:
 # characters (' ', '$', '%', '*') excluded.
 _BASE41_CHARSET: str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./:"
 
-_COLOR_REGEX: re.Pattern = re.compile(r"^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$")
+_COLOR_REGEX: re.Pattern = re.compile(r"^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$")
 
 def toPrintableChar(value: int) -> str:
 	if (value < 0x20) or (value > 0x7e):
@@ -78,7 +78,7 @@ def decodeBase41(data: str) -> bytearray:
 
 	return output
 
-def colorFromString(value: str) -> tuple[int, int, int]:
+def colorFromString(value: str) -> tuple[int, int, int, int]:
 	matched: re.Match | None = _COLOR_REGEX.match(value)
 
 	if matched is None:
@@ -86,17 +86,19 @@ def colorFromString(value: str) -> tuple[int, int, int]:
 
 	digits: str = matched.group(1)
 
-	if len(digits) == 3:
+	if len(digits) == 4:
 		return (
 			int(digits[0], 16) * 0x11,
 			int(digits[1], 16) * 0x11,
-			int(digits[2], 16) * 0x11
+			int(digits[2], 16) * 0x11,
+			int(digits[3], 16) * 0x11
 		)
 	else:
 		return (
 			int(digits[0:2], 16),
 			int(digits[2:4], 16),
-			int(digits[4:6], 16)
+			int(digits[4:6], 16),
+			int(digits[6:8], 16)
 		)
 
 ## Hashes and checksums

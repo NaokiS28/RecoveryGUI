@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# 573in1 - Copyright (C) 2022-2024 spicyjpeg
+# BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
 #
-# 573in1 is free software: you can redistribute it and/or modify it under the
+# BemaniUX is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+# BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along with
-# 573in1. If not, see <https://www.gnu.org/licenses/>.
+# BemaniUX. If not, see <https://www.gnu.org/licenses/>.
 
 from itertools import chain
 from struct    import Struct
@@ -191,7 +191,7 @@ def generateFontMetrics(metrics: Mapping[str, Any]) -> bytearray:
 
 ## Color palette generator
 
-_PALETTE_ENTRY_STRUCT: Struct = Struct("< 3B x")
+_PALETTE_ENTRY_STRUCT: Struct = Struct("< 4B")
 
 _PALETTE_ENTRIES: Sequence[str] = (
 	"default",
@@ -225,11 +225,11 @@ def generateColorPalette(
 		if color is None:
 			raise ValueError(f"no entry found for {entry}")
 		if isinstance(color, str):
-			r, g, b = colorFromString(color)
+			r, g, b, a = colorFromString(color)
 		else:
-			r, g, b = color
+			r, g, b, a = color
 
-		data += _PALETTE_ENTRY_STRUCT.pack(r, g, b)
+		data += _PALETTE_ENTRY_STRUCT.pack(r, g, b, a)
 
 	return data
 

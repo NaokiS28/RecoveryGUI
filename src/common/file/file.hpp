@@ -1,26 +1,28 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #pragma once
 
 #include <stddef.h>
 #include <stdint.h>
+#include <cctype>
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
 #include "common/gpu.hpp"
+#include "common/io.hpp"
 
 namespace file {
 
@@ -150,6 +152,10 @@ public:
 	virtual size_t saveData(const void *input, size_t length, const char *path);
 
 	size_t loadTIM(gpu::Image &output, const char *path);
+	size_t loadPNG(gpu::Image &output, const char *path);
+	size_t loadBMP(gpu::Image &output, const char *path);
+	size_t loadImage(gpu::Image &output, const char *path);
+	//size_t loadKeymap(io::KeyboardHandler &output, const char *path);
 };
 
 /* String table parser */

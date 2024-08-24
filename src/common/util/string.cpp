@@ -1,17 +1,17 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <bit>
@@ -114,25 +114,25 @@ size_t encodeBase41(char *output, const uint8_t *input, size_t length) {
 /* UTF-8 parser */
 
 UTF8Character parseUTF8Character(const char *ch) {
-	uint8_t codePoint = *(ch++);
+    uint8_t startByte = *(ch++);
 
-	if (!(codePoint >> 7))
-		return { codePoint, 1 };
+    if (!(startByte >> 7))
+        return { startByte, 1 };
 
-	size_t length = std::countl_one(codePoint);
-	codePoint    &= (1 << (7 - length)) - 1;
+    size_t   length    = std::countl_one(startByte);
+    uint32_t codePoint = startByte & ((1 << (7 - length)) - 1);
 
-	for (int i = length - 1; i > 0; i--) {
-		uint8_t contByte = *(ch++);
+    for (int i = length - 1; i > 0; i--) {
+        uint8_t contByte = *(ch++);
 
-		if ((contByte & 0xc0) != 0x80)
-			return { codePoint, 0 };
+        if ((contByte & 0xc0) != 0x80)
+            return { codePoint, 0 };
 
-		codePoint <<= 6;
-		codePoint  |= contByte & 0x3f;
-	}
+        codePoint <<= 6;
+        codePoint  |= contByte & 0x3f;
+    }
 
-	return { codePoint, length };
+    return { codePoint, length };
 }
 
 size_t getUTF8StringLength(const char *str) {

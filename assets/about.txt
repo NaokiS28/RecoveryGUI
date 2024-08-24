@@ -1,7 +1,7 @@
-- 573in1: Konami System 573 maintenance tool -
+- BemaniUX -
 
 Version ${PROJECT_VERSION} 
-(C) 2022-2024 spicyjpeg 
+(C) 2022-2024 spicyjpeg, NaokiS 
 
 Full documentation, source code and more available here: 
     <${PROJECT_HOMEPAGE_URL}> 
@@ -13,38 +13,31 @@ into paying for it.
 
 Lead developer: 
     spicyjpeg 
-
-Reverse engineering: 
-    Naoki Saito 
-    smf 
+    NaokiS
 
 Testing: 
     AndreaM 
     tensionvex 
 
 Special thanks: 
-    987123879113 
-    Gabrimax 
-    Hyphen/4434 
-    Martin Korth (nocash) 
     Nicolas Noble 
     Everyone on the Rhythm Game Cabs and PSX.Dev Discord servers 
 
 [ License ]
 
-Copyright (C) 2022-2024 spicyjpeg
+Copyright (C) 2022-2024 spicyjpeg, NaokiS
 
-573in1 is free software: you can redistribute it and/or modify it under the
+BemaniUX is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
 version.
 
-573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-573in1. If not, see <https://www.gnu.org/licenses/>.
+BemaniUX. If not, see <https://www.gnu.org/licenses/>.
 
 [ Third-party licenses ]
 
@@ -98,6 +91,5 @@ out of or in connection with the Software or the use or other dealings in the
 Software. 
 
 
-
 A System 573, a flash chip and several security cartridges were killed during
-the development of this tool. May they all rest in peace.
+the development of this software. May they all rest in peace.

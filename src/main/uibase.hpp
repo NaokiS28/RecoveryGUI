@@ -1,17 +1,17 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -19,12 +19,18 @@
 #include <stdint.h>
 #include "common/util/log.hpp"
 #include "common/util/tween.hpp"
+#include "common/util/units.hpp"
 #include "common/gpu.hpp"
 #include "common/gpufont.hpp"
+#include "common/io.hpp"
+#include <windows.h>
+
 
 namespace ui {
 
 /* Public constants */
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 static constexpr int NUM_UI_COLORS = 18;
 
@@ -90,6 +96,10 @@ static constexpr int SCROLL_AMOUNT = 32;
 static constexpr int NUM_BUTTONS  = 4;
 static constexpr int REPEAT_DELAY = 30;
 
+/* UI - Windows specific */
+static constexpr int UI_REFRESH_TIMER = 1;
+static constexpr int UI_REFRESH_INTERVAL = 16;  // ~60 Hz (1000ms / 60)
+
 enum Button {
 	BTN_LEFT  = 0,
 	BTN_RIGHT = 1,
@@ -138,6 +148,7 @@ public:
 
 class Layer;
 class Screen;
+class Cursor;
 
 class Context {
 private:
@@ -153,6 +164,11 @@ public:
 	gpu::Color colors[NUM_UI_COLORS];
 
 	ButtonState buttons;
+	io::Context &ioCtx;
+
+	io::Player *players[3];
+
+	bool runUpdate = true;	// When set, UI and menu elements are updated
 
 	int  time;
 	void *screenData; // Opaque, can be accessed by screens
@@ -168,17 +184,37 @@ public:
 		time++;
 	}
 
-	Context(gpu::Context &gpuCtx, void *screenData = nullptr);
+	Context(gpu::Context &gpuCtx, io::Context &ioCtx, void *screenData = nullptr);
 	void show(Screen &screen, bool goBack = false, bool playSound = false);
 	void draw(void);
-	void update(void);
+	int update(void);
+	void init();
+};
+
+/* Cursor Context */
+class Cursor {
+	public:
+	gpu::Image arrow;
+	
+	Cursor(){}
+	void setPosition(int x, int y){}
+	void draw(Context &ctx, bool active = true) const {}
 };
 
 /* Layer classes */
 
+struct LayerCallback {
+	gpu::RectWH area;
+	void* callbackFunc = nullptr; 
+};
+
 class Layer {
 protected:
+	LayerCallback _layers;	// Windowing
+	uint8_t _layerSize;
+
 	void _newLayer(Context &ctx, int x, int y, int width, int height) const;
+	void _setOffset(Context &ctx, int x, int y) const;
 	void _setTexturePage(
 		Context &ctx, uint16_t texpage, bool dither = false
 	) const;
@@ -193,7 +229,6 @@ public:
 class TiledBackground : public Layer {
 public:
 	gpu::Image tile;
-
 	void draw(Context &ctx, bool active = true) const;
 };
 
@@ -210,6 +245,7 @@ public:
 class SplashOverlay : public Layer {
 private:
 	util::Tween<int, util::QuadOutEasing> _fadeAnim;
+	util::Tween<int, util::QuadOutEasing> _imgFadeAnim;
 
 public:
 	gpu::Image image;
@@ -240,6 +276,20 @@ public:
 	void draw(Context &ctx, bool active = true) const;
 	void animate(Context &ctx);
 };
+
+class InputDebugOverlay : public Layer {
+private:
+
+public:
+	void draw(Context &ctx, bool active = true) const;
+};
+
+class MouseOverlay : public Layer {
+	public:
+	gpu::Image cursor;
+	void draw(Context &ctx, bool active = true) const;
+};
+
 
 /* Base screen classes */
 

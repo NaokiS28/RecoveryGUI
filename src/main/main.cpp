@@ -1,27 +1,30 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "common/util/hash.hpp"
 #include "common/util/log.hpp"
+#include "common/util/vesa.hpp"
 #include "common/args.hpp"
 #include "common/gpu.hpp"
 #include "main/app/app.hpp"
 #include "main/uibase.hpp"
+#include "common/windowproc.hpp"
 
-int main(int argc, const char **argv) {
+int main(int argc, const char **argv)
+{
 	util::initZipCRC32();
 
 	args::MainArgs args;
@@ -29,14 +32,26 @@ int main(int argc, const char **argv) {
 	for (; argc > 1; argc--)
 		args.parseArgument(*(++argv));
 
-	if (!args.resourcePath) {
+	if (!args.resourcePath)
+	{
 		LOG_APP("required arguments missing");
 		return 1;
 	}
 
+	LOG_APP("Resource path is: %s", args.resourcePath);
+	LOG_APP("Screen resolution is: %dx%d", args.screenWidth, args.screenHeight);
+
 	auto gpuCtx = new gpu::Context(args.screenWidth, args.screenHeight);
-	auto uiCtx  = new ui::Context(*gpuCtx);
-	auto app    = new App(*uiCtx);
+	auto ioCtx = new io::Context();
+	auto uiCtx = new ui::Context(*gpuCtx, *ioCtx);
+	auto app = new App(*uiCtx);
+	
+	#ifdef _WINDOWS_
+	win::Window window(uiCtx);
+	gpuCtx->windowHandle = window.CreateMainWindow(args.screenWidth, args.screenHeight);
+	gpuCtx->setResolution(vesa::QVGA);
+	gpuCtx->setScale(gpu::GUI_SCALE_1X);
+	#endif
 
 	app->run(args.resourcePath);
 
@@ -45,3 +60,4 @@ int main(int argc, const char **argv) {
 	delete gpuCtx;
 	return 0;
 }
+

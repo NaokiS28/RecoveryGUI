@@ -1,17 +1,17 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -65,10 +65,10 @@ private:
 	util::Tween<int, util::QuadOutEasing> _scrollAnim, _itemAnim;
 
 	inline int _getItemWidth(Context &ctx) const {
-		return ctx.gpuCtx.width - (SCREEN_MARGIN_X + LIST_BOX_PADDING) * 2;
+		return ctx.gpuCtx.getHorizontalRes() - (SCREEN_MARGIN_X + LIST_BOX_PADDING) * 2;
 	}
 	inline int _getListHeight(Context &ctx) const {
-		int screenHeight = ctx.gpuCtx.height - SCREEN_MARGIN_Y * 2;
+		int screenHeight = ctx.gpuCtx.getVerticalRes() - SCREEN_MARGIN_Y * 2;
 		return screenHeight - (
 			ctx.font.getLineHeight() + SCREEN_PROMPT_HEIGHT +
 			SCREEN_BLOCK_MARGIN * 2

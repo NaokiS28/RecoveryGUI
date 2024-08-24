@@ -1,17 +1,17 @@
 /*
- * 573in1 - Copyright (C) 2022-2024 spicyjpeg
+ * BemaniUX - Copyright (C) 2022-2024 spicyjpeg, NaokiS
  *
- * 573in1 is free software: you can redistribute it and/or modify it under the
+ * BemaniUX is free software: you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation, either version 3 of the License, or (at your option) any later
  * version.
  *
- * 573in1 is distributed in the hope that it will be useful, but WITHOUT ANY
+ * BemaniUX is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
  * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along with
- * 573in1. If not, see <https://www.gnu.org/licenses/>.
+ * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <stddef.h>
@@ -26,24 +26,28 @@
 #include "common/gpu.hpp"
 #include "main/app/app.hpp"
 #include "main/uibase.hpp"
+#include "common/virtualio.hpp"
 
 /* Filesystem manager class */
 
-const char *const IDE_MOUNT_POINTS[]{ "ide0:", "ide1:" };
+const char *const IDE_MOUNT_POINTS[]{"ide0:", "ide1:"};
 
 FileIOManager::FileIOManager(void)
-: _resourceFile(nullptr) {
+	: _resourceFile(nullptr)
+{
 	vfs.mount("resource:", &resource);
-	vfs.mount("host:",     &host);
+	vfs.mount("host:", &host);
 }
 
-bool FileIOManager::loadResourceFile(const char *path) {
+bool FileIOManager::loadResourceFile(const char *path)
+{
 	closeResourceFile();
 
 	if (path)
 		_resourceFile = vfs.openFile(path, file::READ);
 
-	if (_resourceFile) {
+	if (_resourceFile)
+	{
 		if (resource.init(_resourceFile))
 			return true;
 
@@ -53,14 +57,16 @@ bool FileIOManager::loadResourceFile(const char *path) {
 	}
 
 	// Fall back to the default in-memory resource archive in case of failure.
-	//resource.init(resourcePtr, resourceLength);
+	// resource.init(resourcePtr, resourceLength);
 	return false;
 }
 
-void FileIOManager::closeResourceFile(void) {
+void FileIOManager::closeResourceFile(void)
+{
 	resource.close();
 
-	if (_resourceFile) {
+	if (_resourceFile)
+	{
 		_resourceFile->close();
 		delete _resourceFile;
 		_resourceFile = nullptr;
@@ -73,24 +79,28 @@ static constexpr int _SPLASH_SCREEN_TIMEOUT = 5;
 
 App::App(ui::Context &ctx)
 #ifdef ENABLE_LOG_BUFFER
-: _logOverlay(_logBuffer),
+	: _logOverlay(_logBuffer),
 #else
-:
+	:
 #endif
-_ctx(ctx) {}
-
-void App::_loadResources(void) {
-	auto &res = _fileIO.resource;
-
-	res.loadStruct(_ctx.colors,       "assets/palette.dat");
-	res.loadTIM(_background.tile,     "assets/textures/background.tim");
-	res.loadTIM(_ctx.font.image,      "assets/textures/font.tim");
-	res.loadData(_ctx.font.metrics,   "assets/textures/font.metrics");
-	res.loadTIM(_splashOverlay.image, "assets/textures/splash.tim");
-	res.loadData(_stringTable,        "assets/lang/en.lang");
+	  _ctx(ctx)
+{
 }
 
-bool App::_createDataDirectory(void) {
+void App::_loadResources(void)
+{
+	auto &res = _fileIO.resource;
+	res.loadImage(_background.tile, "assets/textures/background.png");
+	res.loadStruct(_ctx.colors, "assets/palette.dat");
+	res.loadImage(_ctx.font.image, "assets/textures/font.png");
+	res.loadData(_ctx.font.metrics, "assets/textures/font.metrics");
+	res.loadImage(_splashOverlay.image, "assets/textures/splash.png");
+	res.loadData(_stringTable, "assets/lang/en.lang");
+	//res.loadImage(_ctx.cursor.arrow, "assets/textures/cursor.png");
+}
+
+bool App::_createDataDirectory(void)
+{
 	file::FileInfo info;
 
 	if (!_fileIO.vfs.getFileInfo(info, EXTERNAL_DATA_DIR))
@@ -102,15 +112,16 @@ bool App::_createDataDirectory(void) {
 }
 
 bool App::_getNumberedPath(
-	char *output, size_t length, const char *path, int maxIndex
-) {
+	char *output, size_t length, const char *path, int maxIndex)
+{
 	file::FileInfo info;
 
 	// Perform a binary search in order to quickly find the first unused path.
-	int low  = 0;
+	int low = 0;
 	int high = maxIndex;
 
-	while (low <= high) {
+	while (low <= high)
+	{
 		int index = low + (high - low) / 2;
 
 		snprintf(output, length, path, index);
@@ -128,10 +139,11 @@ bool App::_getNumberedPath(
 	return true;
 }
 
-void App::_updateOverlays(void) {
+void App::_updateOverlays(void)
+{
 	// Date and time overlay
 	static char dateString[24];
-	util::Date  date;
+	util::Date date;
 
 	date.fromCurrentTime();
 	date.toString(dateString);
@@ -139,7 +151,7 @@ void App::_updateOverlays(void) {
 	_textOverlay.leftText = dateString;
 
 	// Splash screen overlay
-	int timeout = _ctx.gpuCtx.refreshRate * _SPLASH_SCREEN_TIMEOUT;
+	int timeout = _ctx.gpuCtx.getRefreshRate() * _SPLASH_SCREEN_TIMEOUT;
 
 	__atomic_signal_fence(__ATOMIC_ACQUIRE);
 
@@ -150,19 +162,21 @@ void App::_updateOverlays(void) {
 	// Log overlay
 	if (
 		_ctx.buttons.released(ui::BTN_DEBUG) &&
-		!_ctx.buttons.longReleased(ui::BTN_DEBUG)
-	)
+		!_ctx.buttons.longReleased(ui::BTN_DEBUG))
 		_logOverlay.toggle(_ctx);
 #endif
 }
 
-[[noreturn]] void App::run(const char *resourceFile) {
+void App::run(const char *resourceFile)
+{
 #ifdef ENABLE_LOG_BUFFER
 	util::logger.setLogBuffer(&_logBuffer);
 #endif
 
 	LOG_APP("build " VERSION_STRING " (" __DATE__ " " __TIME__ ")");
-	LOG_APP("(C) 2022-2024 spicyjpeg");
+	LOG_APP("(C) 2022-2024 spicyjpeg, NaokiS");
+
+	_ctx.init();
 
 	_ctx.screenData = this;
 
@@ -173,22 +187,39 @@ void App::_updateOverlays(void) {
 
 	_ctx.backgrounds[0] = &_background;
 	_ctx.backgrounds[1] = &_textOverlay;
-	_ctx.overlays[0]    = &_splashOverlay;
+	_ctx.overlays[0] = &_splashOverlay;
 #ifdef ENABLE_LOG_BUFFER
-	_ctx.overlays[1]    = &_logOverlay;
+	_ctx.overlays[2] = &_logOverlay;
 #endif
+	// Temporary input debugging
+	_ctx.overlays[1] = &_mouseOverlay;
+	_ctx.overlays[3] = &_inputDbgOverlay;
 
 	_ctx.show(_mainMenuScreen);
 	_splashOverlay.show(_ctx);
 	//_ctx.sounds[ui::SOUND_STARTUP].play();
 
-	for (;;) {
-		_ctx.update();
-		_updateOverlays();
+	_keepAppAlive = true;
 
-		_ctx.draw();
-		// TODO: wait for vsync here
-		_ctx.tick();
-		_ctx.gpuCtx.flip();
+	while (_keepAppAlive)
+	{
+		switch (_ctx.update())
+		{
+		case 1:
+			_keepAppAlive = false;
+			break;
+		default:
+			break;
+		}
+		// runUpdate is called every ~60hz
+		if (_ctx.runUpdate)
+		{
+			_ctx.runUpdate = false;
+			_updateOverlays();
+			_ctx.tick();
+			
+			InvalidateRect(_ctx.gpuCtx.windowHandle, NULL, FALSE);
+			//RedrawWindow(_ctx.gpuCtx.windowHandle, NULL, NULL, RDW_INTERNALPAINT);
+		}
 	}
 }
