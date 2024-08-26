@@ -190,7 +190,6 @@ void App::run(const char *resourceFile)
 	_ctx.overlays[2] = &_logOverlay;
 #endif
 	// Temporary input debugging
-	_ctx.overlays[1] = &_mouseOverlay;
 	_ctx.overlays[3] = &_inputDbgOverlay;
 
 	_ctx.show(_mainMenuScreen);

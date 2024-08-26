@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <windows.h>
 #include "common/virtualio.hpp"
-#include "common/iohandler.hpp"
+#include "common/devhandler.hpp"
 
 using namespace VirtualIO;
 
@@ -31,7 +31,7 @@ using namespace VirtualIO;
     [ ] - Multiple mouse support? (Requires Raw Input)
 */
 
-class MouseHandler : public InputHandler
+class MouseHandler : public DeviceHandler
 {
 private:
     //uint8_t mouseCount = 0;
@@ -43,6 +43,7 @@ private:
     DigitalInput mouseM;
     DigitalInput mouseR;
     */
+    int mouseCount = 0;
     bool isCursorHidden = false;
 
 public:
@@ -50,6 +51,17 @@ public:
     inline bool getCursorHide() const { return isCursorHidden; }
     int init();
     int update();
-    int getInputs(DeviceInputs &dev);
+    int reload() { return 0; }
+
+    const char *getClassName() { return "MOUSE"; }
+    int getDeviceCount() { return mouseCount; }
+    
+    int getClassType() { return INPUT_CLASS_MOUSE; }
+
+    bool getSwitch(uint32_t code) { return false; }
+    int getAnalog(uint32_t code) { return 0; }
+    int getRelative(uint32_t code) { return 0; }
     int processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
+
+REGISTER_DEVICE_HANDLER(MouseHandler)

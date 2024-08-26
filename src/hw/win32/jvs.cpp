@@ -109,9 +109,3 @@ int JVSHandler::update()
 {
     return 0;
 }
-
-int JVSHandler::getInputs(DeviceInputs &dev)
-{
-    return 0;
-}
-

@@ -20,14 +20,13 @@
 */
 
 #pragma once
-#include "common/iohandler.hpp"
+#include "common/devhandler.hpp"
 
-class JVSHandler : public InputHandler
+class JVSHandler : public DeviceHandler
 {
 public:
     JVSHandler(const char* port = nullptr) { }
     int init() { return 0; }
     int isReady(){ return 0; }
     int update() { return 0; }
-    //int getInputs(DeviceInputs &dev);
 };

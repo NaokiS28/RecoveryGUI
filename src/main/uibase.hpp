@@ -281,12 +281,6 @@ public:
 	void draw(Context &ctx, bool active = true) const;
 };
 
-class MouseOverlay : public Layer {
-	public:
-	gpu::Image cursor;
-	void draw(Context &ctx, bool active = true) const;
-};
-
 
 /* Base screen classes */
 

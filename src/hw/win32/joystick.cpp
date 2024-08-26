@@ -27,6 +27,7 @@ int JoystickHandler::init()
     if (!joyReport)
     {
         LOG_APP("No joystick driver installed.");
+        return 1;
     }
 
     uint16_t joy = 0;
@@ -45,7 +46,7 @@ int JoystickHandler::init()
             _newJoystick(joystickDevice);
         }
     }
-    return joystickCount;
+    return 0;
 }
 
 int JoystickHandler::update()
@@ -70,29 +71,70 @@ int16_t JoystickHandler::getInput(uint32_t code)
     // Todo
     uint8_t id = VirtualIO::getInputDevId(code);
     uint8_t InputType = VirtualIO::getInputType(code);
-    uint8_t inputIdx = VirtualIO::getInputIdx(code);
 
-    if(id > (joystickCount - 1)){
+    if (id > (joystickCount - 1))
+    {
         return VirtualIO::INPUT_STATE_INACTIVE;
     }
 
-    if(InputType == VirtualIO::INPUT_TYPE_ANALOG){
-        int16_t val = 0x0000;
-        switch(inputIdx){
-            case 0: val = joystickList[id].state.dwXpos; break;
-            case 1: val = joystickList[id].state.dwYpos; break;
-            case 2: val = joystickList[id].state.dwZpos; break;
-            case 3: val = joystickList[id].state.dwRpos; break;
-            case 4: val = joystickList[id].state.dwUpos; break;
-            case 5: val = joystickList[id].state.dwVpos; break;
-            default: break;
-        }
-        return val;
+    if (InputType == VirtualIO::INPUT_TYPE_ANALOG)
+    {
+        return getAnalog(code);
     }
-    else if(InputType == VirtualIO::INPUT_TYPE_DIGITAL){
-        return ((joystickList[id].getInputs() >> inputIdx) & 0x1 ? 0x7FFF : 0x0000);
+    else if (InputType == VirtualIO::INPUT_TYPE_DIGITAL)
+    {
+        return getSwitch(code);
     }
     return 0;
+}
+
+bool JoystickHandler::getSwitch(uint32_t code)
+{
+    uint8_t id = VirtualIO::getInputDevId(code);
+    uint8_t inputIdx = VirtualIO::getInputIdx(code);
+    if (id < joystickCount && inputIdx < joystickList[id].device.wNumButtons)
+    {
+        return ((joystickList[id].getInputs() >> inputIdx) & 0x1);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+int JoystickHandler::getAnalog(uint32_t code)
+{
+    uint8_t id = VirtualIO::getInputDevId(code);
+    uint8_t inputIdx = VirtualIO::getInputIdx(code);
+    int16_t val = 0x0000;
+
+    if (id < joystickCount && inputIdx < joystickList[id].device.wNumAxes)
+    {
+        switch (inputIdx)
+        {
+        case 0:
+            val = joystickList[id].state.dwXpos;
+            break;
+        case 1:
+            val = joystickList[id].state.dwYpos;
+            break;
+        case 2:
+            val = joystickList[id].state.dwZpos;
+            break;
+        case 3:
+            val = joystickList[id].state.dwRpos;
+            break;
+        case 4:
+            val = joystickList[id].state.dwUpos;
+            break;
+        case 5:
+            val = joystickList[id].state.dwVpos;
+            break;
+        default:
+            break;
+        }
+    }
+    return val;
 }
 
 void JoystickHandler::_newJoystick(JoystickDevice &joy)

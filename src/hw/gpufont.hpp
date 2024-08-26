@@ -2,7 +2,7 @@
 
 // Add other architectures below
 
-#ifdef _WIN32
+#if (defined(_WIN32))
 #include "hw/win32/gpufont.hpp"
 #else
 #error Unsupported target hardware! 

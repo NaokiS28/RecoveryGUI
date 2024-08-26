@@ -19,7 +19,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
-#include "common/iohandler.hpp"
+#include "common/devhandler.hpp"
 
 /*
     Todo:
@@ -28,9 +28,10 @@
     [ ] - Multiple keyboard support? (Requires Raw Input, unlikely to happen)
 */
 
-class KeyboardHandler : public InputHandler
+class KeyboardHandler : public DeviceHandler
 {
 private:
+    int keyboardCount = 0;
 
 
 public:
@@ -39,6 +40,17 @@ public:
     void processKeyUp(WPARAM p);
     int init();
     int update();
-    int getInputs(DeviceInputs &dev);
+    int reload() { return 0; }
+
+    const char *getClassName() { return "KEYBOARD"; }
+    int getDeviceCount() { return keyboardCount; }
+    
+    int getClassType() { return INPUT_CLASS_KEYBOARD; }
+
+    bool getSwitch(uint32_t code) { return false; }
+    int getAnalog(uint32_t code) { return 0; }
+    int getRelative(uint32_t code) { return 0; }
     int processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
+
+REGISTER_DEVICE_HANDLER(KeyboardHandler)

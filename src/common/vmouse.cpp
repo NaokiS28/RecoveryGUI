@@ -14,40 +14,33 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "keyboard.hpp"
+#pragma once
 
-int KeyboardHandler::init()
-{
-    return 0;
-}
+#include "vmouse.hpp"
 
-int KeyboardHandler::update()
+namespace VirtualMouse
 {
-    return 0;
-}
+    void Cursor::update() {
 
-void KeyboardHandler::processKeyDown(WPARAM p)
-{
-    // int doSomething;
-}
-
-void KeyboardHandler::processKeyUp(WPARAM p)
-{
-}
-
-int KeyboardHandler::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_KEYUP:
-    {
-        return 0;
     }
-    case WM_KEYDOWN:
-    {
-        return 0;
+
+    void Cursor::draw(gpu::Context &ctx) {
+        cursor.draw(ctx, _x, _y);
     }
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+
+    void Cursor::click(int button){
+        if(_visible && _onClick != nullptr){
+            if(button <= CURSOR_MAX_BUTTON && button != CURSOR_NULL){
+                _onClick(button);
+            }
+        }
+    }
+
+    void Cursor::scroll(int delta){
+        if(_visible && _onClick != nullptr){
+                _onScroll(
+                    (delta > 0) ? CURSOR_SCROLL_UP : CURSOR_SCROLL_DOWN,
+                    delta);
+        }
     }
 }

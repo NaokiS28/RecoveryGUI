@@ -16,8 +16,6 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <cstdio>
 #include <cstring>
 #include <vector>
 #include <memory>
@@ -48,7 +46,7 @@ namespace VirtualIO
         INPUT_STATE_ACTIVE = true
     };
 
-    enum InputSource
+    /*enum InputSource
     {
         INPUT_SRC_NONE,     // Do not use, this is for code clarity
         INPUT_SRC_KEYBOARD, 
@@ -59,7 +57,7 @@ namespace VirtualIO
         INPUT_SRC_JAMMA,    
         INPUT_SRC_ABSOLUTE,  // Input can only come from a specific device hash
         INPUT_SRC_GROUP     // Input is combined input using input group
-    };
+    };*/
 
     inline const uint8_t INPUT_SRC_ALL = 0xFF;
     // Input name: Get the encoded input name for IO functions. ID is the device hash if src is ABSOLUTE
@@ -71,22 +69,22 @@ namespace VirtualIO
     inline constexpr uint8_t getInputType(uint32_t code) { return ((code & 0x0000FF00) >> 8); }
     inline constexpr uint8_t getInputIdx(uint32_t code) { return ((code & 0x000000FF) >> 0); }
 
-    inline constexpr const char* getInputName(uint32_t code){
+    /*inline constexpr const char* getInputName(uint32_t code){
         uint8_t devId = getInputDevId(code) + 1;
         //uint8_t idx = getInputIdx(code);
 
         char srcName[32];
         switch (getInputSrcType(code)){
-            case INPUT_SRC_MOUSE: snprintf(srcName, 32, "%s%d_%s", "MOUSE", devId, ""); break;
-            case INPUT_SRC_KEYBOARD: snprintf(srcName, 32, "%s_%s", "KEY", ""); break;
-            case INPUT_SRC_JOYSTICK: snprintf(srcName, 32, "%s%d_%s", "JOY", devId, ""); break;
-            case INPUT_SRC_LIGHTGUN: snprintf(srcName, 32, "%s%d_%s", "LIGHTGUN", devId, ""); break;
-            case INPUT_SRC_JVS: snprintf(srcName, 32, "%s%d_%s", "JVS", devId, ""); break;
-            case INPUT_SRC_JAMMA: snprintf(srcName, 32, "%s_%s", "JAMMA", ""); break;
-            case INPUT_SRC_ABSOLUTE: snprintf(srcName, 32, "%s-%X_%s", "DEV", devId, ""); break;
+            case INPUT_CLASS_MOUSE: snprintf(srcName, 32, "%s%d_%s", "MOUSE", devId, ""); break;
+            case INPUT_CLASS_KEYBOARD: snprintf(srcName, 32, "%s_%s", "KEY", ""); break;
+            case INPUT_CLASS_JOYSTICK: snprintf(srcName, 32, "%s%d_%s", "JOY", devId, ""); break;
+            case INPUT_CLASS_LIGHTGUN: snprintf(srcName, 32, "%s%d_%s", "LIGHTGUN", devId, ""); break;
+            //case INPUT_SRC_JVS: snprintf(srcName, 32, "%s%d_%s", "JVS", devId, ""); break;
+            //case INPUT_SRC_JAMMA: snprintf(srcName, 32, "%s_%s", "JAMMA", ""); break;
+            //case INPUT_SRC_ABSOLUTE: snprintf(srcName, 32, "%s-%X_%s", "DEV", devId, ""); break;
             default: return "INVALID_SRC";
         }
-    }
+    }*/
 
     /*
         Mapping system uses 32-bit codes and flags to set processing instructions
@@ -116,9 +114,9 @@ namespace VirtualIO
         uint8_t groupMode = IO_MAP_OR;
 
     public:
-        //void addInput(Input &i);
-        //void removeInput(Input &i);
-        // int getMapping()
+        //void addInput(uint32_t code);
+        //void removeInput(uint32_t code);
+        // int getMapping();
         bool getState();
         inline int16_t getValue() { return (getState() ? 0x0000 : 0xFFFF); }
     };

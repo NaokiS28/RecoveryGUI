@@ -33,20 +33,6 @@ int MouseHandler::update()
     return 0;
 }
 
-int MouseHandler::getInputs(DeviceInputs &dev)
-{
-    /*
-    dev.devName = "MOUSE";
-    dev.devID = 0;
-    dev.analogArray.push_back(&mouseX);
-    dev.analogArray.push_back(&mouseY);
-    dev.analogArray.push_back(&mouseScroll);
-    dev.digitalArray.push_back(&mouseL);
-    dev.digitalArray.push_back(&mouseR);
-    dev.digitalArray.push_back(&mouseM);
-    */
-    return INPUT_DEVICE_OK;
-}
 
 int MouseHandler::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {

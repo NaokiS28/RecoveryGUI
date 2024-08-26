@@ -89,14 +89,14 @@ namespace win
 		case WM_MOUSEWHEEL:
 		case WM_MOUSEMOVE:
 		{
-			return uiCtx->ioCtx.mouse.processMessage(hwnd, uMsg, wParam, lParam);
+			//return uiCtx->ioCtx.mouse.processMessage(hwnd, uMsg, wParam, lParam);
 		}
 
 		// Keyboard
 		case WM_KEYUP:
 		case WM_KEYDOWN:
 		{
-			return uiCtx->ioCtx.keyboard.processMessage(hwnd, uMsg, wParam, lParam);
+			//return uiCtx->ioCtx.keyboard.processMessage(hwnd, uMsg, wParam, lParam);
 		}
 		case WM_SIZE:
 		{

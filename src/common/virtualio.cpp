@@ -14,11 +14,7 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#include <cstdio>
-#include <cstring>
-#include <vector>
-#include <memory>
+
 #include "virtualio.hpp"
 
 namespace VirtualIO

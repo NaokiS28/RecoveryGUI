@@ -18,7 +18,6 @@
 
 #include <string>
 #include <cstring>
-#include "hw/gpufont.hpp"
 #include "hw/gpu.hpp"
 
 /* Todo list:

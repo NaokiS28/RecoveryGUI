@@ -29,7 +29,7 @@
 #include <future>
 #include <iostream>
 #include <atomic>
-#include "common/iohandler.hpp"
+#include "common/devhandler.hpp"
 #include "common/util/log.hpp"
 
 /*
@@ -61,17 +61,17 @@ constexpr int JVS_CFG_USE_DTR (1 << 4);
 constexpr int JVS_CFG_USE_RI (1 << 4);
 
 struct JVSHostPort {
-    uint8_t ioCount = 0;
     HANDLE comPort = nullptr;
     DCB* comPortSettings = nullptr;
     JVSStatus comStatus = JVS_NOT_READY;
     uint16_t jvsSenseMode = JVS_CFG_USE_NONE;
 };
 
-class JVSHandler : public InputHandler
+class JVSHandler : public DeviceHandler
 {
 private:
     JVSHostPort _hostPort;
+    int ioCount = 0;
     //JVSTask _currTask = JVS_TASK_NONE;
 
     //std::thread *_workerThread = nullptr;
@@ -79,7 +79,18 @@ private:
 public:
     JVSHandler(const char* port = nullptr);
     int init();
+    int reload() { return 0; }
     int isReady(){ return 0; }
     int update();
-    int getInputs(DeviceInputs &dev);
+
+    const char *getClassName() { return "JVS"; }
+    int getDeviceCount() { return ioCount; }
+    
+    int getClassType() { return INPUT_CLASS_JOYSTICK; }
+
+    bool getSwitch(uint32_t code) { return false; }
+    int getAnalog(uint32_t code) { return 0; }
+    int getRelative(uint32_t code) { return 0; }
 };
+
+//REGISTER_DEVICE_HANDLER(JVSHandler)

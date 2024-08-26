@@ -22,8 +22,6 @@
 #include "common/file/file.hpp"
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
-#include "hw/gpu.hpp"
-#include "hw/keyboard.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "common/util/stb_image.h"

@@ -99,7 +99,8 @@ namespace ui
 		util::clear(overlays);
 	}
 
-	void Context::init(){
+	void Context::init()
+	{
 		players[0] = new io::Player(io::PLAYER_CABINET, 4);
 		players[1] = new io::Player(io::PLAYER_1, 8);
 		players[2] = new io::Player(io::PLAYER_2, 8);
@@ -396,34 +397,21 @@ namespace ui
 		text.y1 = text.y2 + lineHeight;
 		text.y2 = text.y1 + lineHeight;
 
-		int listLength = 0; // ctx.ioCtx.getInputListSize();
+		int joyStickListLength = ctx.ioCtx.getDeviceCount(INPUT_CLASS_JOYSTICK);
 		char textBuffer[32];
 
-		for (int i = 0; i < listLength; i++)
+		for (int i = 0; i < joyStickListLength; i++)
 		{
-			textBuffer[0] = '\0';
-			int inputType = 0; // ctx.ioCtx.getRawInputType(i);
-			if (inputType != INPUT_TYPE_ERROR)
+			int analogCount = ctx.ioCtx.getRawInputCount(
+				VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_ANALOG, 0));
+			for (int a = 0; a < analogCount; a++)
 			{
-				switch (inputType)
-				{
-				case INPUT_TYPE_ANALOG:
-				{
-					uint16_t val = ctx.ioCtx.getRawInputValue(i);
-					sprintf(
-						textBuffer, "%d: %s - 0x%x", i + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
-						val);
-					break;
-				}
-				case INPUT_TYPE_DIGITAL:
-				{
-					bool state = ctx.ioCtx.getRawInputState(i);
-					sprintf(
-						textBuffer, "%d: %s - %s", i + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
-						(state ? "ON" : "OFF"));
-					break;
-				}
-				}
+				textBuffer[0] = '\0';
+				int code = VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_DIGITAL, a);
+				int16_t value = ctx.ioCtx.getRawInputValue(code);
+				snprintf(
+					textBuffer, 32, "%d: %s - %x", a + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
+					value);
 
 				ctx.font.draw(
 					ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
@@ -431,18 +419,24 @@ namespace ui
 				text.y1 = text.y2;
 				text.y2 += lineHeight;
 			}
-		}
-	}
 
-	void MouseOverlay::draw(Context &ctx, bool active) const
-	{
-		bool drawCursor = ctx.ioCtx.mouse.getCursorHide();
-		if (drawCursor)
-		{
-			_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
-			int x = ctx.ioCtx.getRawInputValue(0);
-			int y = ctx.ioCtx.getRawInputValue(1);
-			cursor.draw(ctx.gpuCtx, x, y);
+			int switchCount = ctx.ioCtx.getRawInputCount(
+				VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_DIGITAL, 0));
+			for (int s = 0; s < switchCount; s++)
+			{
+				textBuffer[0] = '\0';
+				int code = VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_DIGITAL, s);
+				bool state = ctx.ioCtx.getRawInputState(code);
+				snprintf(
+					textBuffer, 32, "%d: %s - %s", s + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
+					(state ? "ON" : "OFF"));
+
+				ctx.font.draw(
+					ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
+
+				text.y1 = text.y2;
+				text.y2 += lineHeight;
+			}
 		}
 	}
 

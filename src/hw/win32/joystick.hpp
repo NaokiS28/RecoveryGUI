@@ -29,7 +29,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
-#include "common/iohandler.hpp"
+#include "common/devhandler.hpp"
 #include "common/virtualio.hpp"
 #include "common/util/log.hpp"
 
@@ -48,11 +48,11 @@ public:
     JOYCAPS device;
 };
 
-class JoystickHandler : public InputHandler
+class JoystickHandler : public DeviceHandler
 {
 private:
     bool polledMode = false; // Joysticks can use messaging or polling.
-    uint16_t joystickCount = 0;
+    int joystickCount = 0;
     JoystickDevice *joystickList = nullptr;
     void _newJoystick(JoystickDevice &joy);
 
@@ -62,6 +62,20 @@ public:
 
     int init();
     int update();
+    int reload() { return 0; }
+    const char *getClassName() { return "JOYSTICK"; }
+    int getClassType() { return INPUT_CLASS_JOYSTICK; }
+    int getDeviceCount() { return joystickCount; }
+
+    bool getSwitch(uint32_t code);
+    int getAnalog(uint32_t code);
+    int getRelative(uint32_t code) { return 0; }
+
+    int getSwitchCount(uint32_t code) { return joystickList[VirtualIO::getInputDevId(code)].device.wNumButtons; }
+    int getAnalogCount(uint32_t code) { return joystickList[VirtualIO::getInputDevId(code)].device.wNumAxes; }
+    int getRelativeCount(uint32_t code) { return 0; }
     
     int16_t getInput(uint32_t code);
 };
+
+REGISTER_DEVICE_HANDLER(JoystickHandler)

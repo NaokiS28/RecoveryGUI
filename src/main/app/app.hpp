@@ -78,7 +78,6 @@ private:
 #endif
 
 	ui::InputDebugOverlay _inputDbgOverlay;
-	ui::MouseOverlay	_mouseOverlay;
 
 	ui::Context       &_ctx;
 	file::StringTable _stringTable;
