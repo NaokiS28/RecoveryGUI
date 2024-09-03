@@ -22,7 +22,6 @@
 #include "common/util/hash.hpp"
 #include "common/util/templates.hpp"
 #include "hw/gpu.hpp"
-#include "common/io.hpp"
 
 namespace file {
 

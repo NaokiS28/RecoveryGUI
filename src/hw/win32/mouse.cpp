@@ -16,25 +16,22 @@
 
 #include "mouse.hpp"
 
-int MouseHandler::init()
+int Win32Mouse::init()
 {
-    //mouseX = AnalogInput("MOUSE_X_AXIS", INPUT_SRC_MOUSE, 0);
-    //mouseY = AnalogInput("MOUSE_Y_AXIS", INPUT_SRC_MOUSE, 0);
-    //mouseScroll = AnalogInput("MOUSE_SCROLL_AXIS", INPUT_SRC_MOUSE, 0);
-    //mouseL = DigitalInput("MOUSE_LEFT_CLICK", INPUT_SRC_MOUSE, 0);
-    //mouseM = DigitalInput("MOUSE_MIDDLE_CLICK", INPUT_SRC_MOUSE, 0);
-    //mouseR = DigitalInput("MOUSE_RIGHT_CLICK", INPUT_SRC_MOUSE, 0);
     return 0;
 }
 
-int MouseHandler::update()
+void Win32Mouse::update()
 {
     
-    return 0;
+}
+
+int Win32Mouse::getMouseType(int idx){
+    return Mouse::Relative;
 }
 
 
-int MouseHandler::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+int Win32Mouse::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {

@@ -14,39 +14,6 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "keyboard.hpp"
+#pragma once
 
-int Win32Keyboard::init()
-{
-    return 0;
-}
-
-void Win32Keyboard::update(){
-    
-}
-
-void Win32Keyboard::processKeyDown(WPARAM p)
-{
-    // int doSomething;
-}
-
-void Win32Keyboard::processKeyUp(WPARAM p)
-{
-}
-
-int Win32Keyboard::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_KEYUP:
-    {
-        return 0;
-    }
-    case WM_KEYDOWN:
-    {
-        return 0;
-    }
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
-}
+#include "common/ui/layers/bg.hpp"

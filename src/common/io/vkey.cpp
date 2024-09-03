@@ -14,39 +14,33 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "keyboard.hpp"
+#include "vkey.hpp"
 
-int Win32Keyboard::init()
+namespace vKey
 {
-    return 0;
-}
 
-void Win32Keyboard::update(){
-    
-}
-
-void Win32Keyboard::processKeyDown(WPARAM p)
-{
-    // int doSomething;
-}
-
-void Win32Keyboard::processKeyUp(WPARAM p)
-{
-}
-
-int Win32Keyboard::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
+    Context::Context(post::PostBox *outBox) : _outBox(outBox)
     {
-    case WM_KEYUP:
-    {
+        _enabled = false;
+        _physicalPresent = false;
+        _locale = locale::US;
+    }
+
+    void Context::_checkPhysicalPresent(){
+        bool physicalDevice = false;
+        for (auto& dev : _devices){
+            int type = dev->getKeyboardType(0);
+            if(type != Mouse::None && type != Mouse::Virtual){
+                physicalDevice = true;
+            }
+        }
+        _physicalPresent = physicalDevice;
+    }
+
+    int Context::init(){
+        _checkPhysicalPresent();
+        
         return 0;
     }
-    case WM_KEYDOWN:
-    {
-        return 0;
-    }
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
+
 }

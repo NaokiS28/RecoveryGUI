@@ -44,16 +44,23 @@ if(WIN32)
 		src/common/util/misc.cpp
 		src/common/util/string.cpp
 		src/common/util/tween.cpp
+		src/common/ui/layerman.cpp
+		src/common/ui/layers/bg.cpp
+		src/common/ui/layers/vkey.cpp
+		src/common/ui/layers/vmouse.cpp
 		src/common/args.cpp
+		src/common/io/vinput.cpp
+		src/common/io/vkey.cpp
+		src/common/io/vmouse.cpp
+		src/common/io/vjoy.cpp
+		src/common/io/vlightgun.cpp
+		src/common/io/voutput.cpp
 		src/hw/win32/gpu.cpp
 		src/hw/win32/gpufont.cpp
-		src/common/io.cpp
 		src/hw/win32/joystick.cpp
 		src/hw/win32/keyboard.cpp
 		src/hw/win32/mouse.cpp
 		src/hw/win32/jvs.cpp
-		src/common/io.cpp
-		src/common/virtualio.cpp
 		src/hw/win32/windowproc.cpp
 		src/main/app/app.cpp
 		src/main/app/mainmenu.cpp
@@ -68,35 +75,7 @@ if(WIN32)
 	)
 else()
     add_executable(
-		main
-		src/common/file/file.cpp
-		src/common/file/misc.cpp
-		src/common/file/zip.cpp
-		src/common/util/hash.cpp
-		src/common/util/log.cpp
-		src/common/util/misc.cpp
-		src/common/util/string.cpp
-		src/common/util/tween.cpp
-		src/common/args.cpp
-		src/common/gpu.cpp
-		src/common/gpufont.cpp
-		src/common/io.cpp
-		src/common/joystick.cpp
-		src/common/keyboard.cpp
-		src/common/mouse.cpp
-		src/common/jvs.cpp
-		src/common/io.cpp
-		src/common/virtualio.cpp
-		src/common/windowproc.cpp
-		src/main/app/app.cpp
-		src/main/app/mainmenu.cpp
-		src/main/app/modals.cpp
-		src/main/main.cpp
-		src/main/uibase.cpp
-		src/main/uicommon.cpp
-		src/main/uimodals.cpp
-		src/vendor/miniz.c
-		src/vendor/qrcodegen.c
+
 	)
 endif()
 

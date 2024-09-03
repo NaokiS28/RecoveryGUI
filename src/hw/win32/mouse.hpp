@@ -19,10 +19,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
-#include "common/virtualio.hpp"
-#include "common/devhandler.hpp"
+//#include "common/io/virtualio.hpp"
+#include "common/io/devhandler.hpp"
 
-using namespace VirtualIO;
+using namespace Device;
 
 /*
     Todo:
@@ -31,7 +31,7 @@ using namespace VirtualIO;
     [ ] - Multiple mouse support? (Requires Raw Input)
 */
 
-class MouseHandler : public DeviceHandler
+class Win32Mouse : public MouseHandler
 {
 private:
     //uint8_t mouseCount = 0;
@@ -47,21 +47,17 @@ private:
     bool isCursorHidden = false;
 
 public:
-    MouseHandler(){}
+    Win32Mouse() { _deviceClasses[0] = DeviceClass::MouseClass; }
     inline bool getCursorHide() const { return isCursorHidden; }
+
     int init();
-    int update();
-    int reload() { return 0; }
-
-    const char *getClassName() { return "MOUSE"; }
-    int getDeviceCount() { return mouseCount; }
+    void update();
+    int reload(){ return 0; }
     
-    int getClassType() { return INPUT_CLASS_MOUSE; }
+    int getDeviceCount() { return mouseCount; }
+    int getMouseType(int idx);
 
-    bool getSwitch(uint32_t code) { return false; }
-    int getAnalog(uint32_t code) { return 0; }
-    int getRelative(uint32_t code) { return 0; }
     int processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };
 
-REGISTER_DEVICE_HANDLER(MouseHandler)
+REGISTER_DEVICE_HANDLER(Win32Mouse)

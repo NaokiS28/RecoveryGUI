@@ -14,39 +14,21 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "keyboard.hpp"
+#include "vlightgun.hpp"
 
-int Win32Keyboard::init()
+namespace vLightgun
 {
-    return 0;
-}
-
-void Win32Keyboard::update(){
-    
-}
-
-void Win32Keyboard::processKeyDown(WPARAM p)
-{
-    // int doSomething;
-}
-
-void Win32Keyboard::processKeyUp(WPARAM p)
-{
-}
-
-int Win32Keyboard::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
+    Context::Context(post::PostBox *outBox) : _outBox(outBox)
     {
-    case WM_KEYUP:
+        
+    }
+
+    void Context::addLightgun()
     {
-        return 0;
     }
-    case WM_KEYDOWN:
+
+    void Context::removeLightgun()
     {
-        return 0;
     }
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
+
 }

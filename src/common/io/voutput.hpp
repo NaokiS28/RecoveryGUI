@@ -16,31 +16,31 @@
 
 #pragma once
 
-#include "vmouse.hpp"
+#include <vector>
+#include <memory>
 
-namespace VirtualMouse
+#include "postbox.hpp"
+#include "inputdefs.hpp"
+#include "devhandler.hpp"
+
+/*
+    Virtual Output
+*/
+
+/*
+    Todo:
+    [ ] - The lot
+
+*/
+
+namespace vOutput
 {
-    void Cursor::update() {
-
-    }
-
-    void Cursor::draw(gpu::Context &ctx) {
-        cursor.draw(ctx, _x, _y);
-    }
-
-    void Cursor::click(int button){
-        if(_visible && _onClick != nullptr){
-            if(button <= CURSOR_MAX_BUTTON && button != CURSOR_NULL){
-                _onClick(button);
-            }
-        }
-    }
-
-    void Cursor::scroll(int delta){
-        if(_visible && _onClick != nullptr){
-                _onScroll(
-                    (delta > 0) ? CURSOR_SCROLL_UP : CURSOR_SCROLL_DOWN,
-                    delta);
-        }
-    }
+    class Context {
+    public:
+        post::PostBox* _outBox;
+        post::PostBox* _inBox;
+        
+        Context(post::PostBox *outBox) : _outBox(outBox){}
+    };
+    
 }

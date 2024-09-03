@@ -26,56 +26,62 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
+#include <vector>
+#include <memory>
+#include <string>
 #include <windows.h>
-#include "common/devhandler.hpp"
-#include "common/virtualio.hpp"
+
 #include "common/util/log.hpp"
+#include "common/io/devhandler.hpp"
+#include "common/io/inputdefs.hpp"
+
+using namespace Device;
 
 class JoystickDevice
 {
     // Win32 Joystick API wrapper
 public:
     JoystickDevice() {}
-    JoystickDevice(JOYINFOEX _i, JOYCAPS _c)
+    JoystickDevice(int _id, JOYINFOEX _i, JOYCAPS _c)//, DeviceMeta _m)
     {
+        id = _id;
         state = _i;
         device = _c;
+        //meta = _m;
     }
     uint32_t getInputs() { return state.dwButtons; }
+    int id = 0;
     JOYINFOEX state;
     JOYCAPS device;
+    //DeviceMeta meta;
 };
 
-class JoystickHandler : public DeviceHandler
+class Win32Joy : public JoystickHandler
 {
 private:
-    bool polledMode = false; // Joysticks can use messaging or polling.
-    int joystickCount = 0;
-    JoystickDevice *joystickList = nullptr;
+    bool polledMode = true; // Joysticks can use messaging or polling.
+    std::vector<JoystickDevice> joystickList;
     void _newJoystick(JoystickDevice &joy);
+    void _reset();
 
 public:
-    JoystickHandler(bool _poll = true) : polledMode(_poll) {}
-    ~JoystickHandler() { delete joystickList; }
+    Win32Joy() { _deviceClasses[0] = Device::JoystickClass; }
+    ~Win32Joy() { _reset(); }
 
-    int init();
-    int update();
-    int reload() { return 0; }
-    const char *getClassName() { return "JOYSTICK"; }
-    int getClassType() { return INPUT_CLASS_JOYSTICK; }
-    int getDeviceCount() { return joystickCount; }
+    int init() override;
+    void update() override;
+    int reload() override;
 
-    bool getSwitch(uint32_t code);
-    int getAnalog(uint32_t code);
-    int getRelative(uint32_t code) { return 0; }
+    const char *getDeviceName(int idx);
+    int getDeviceCount() override { return joystickList.size(); }
 
-    int getSwitchCount(uint32_t code) { return joystickList[VirtualIO::getInputDevId(code)].device.wNumButtons; }
-    int getAnalogCount(uint32_t code) { return joystickList[VirtualIO::getInputDevId(code)].device.wNumAxes; }
-    int getRelativeCount(uint32_t code) { return 0; }
-    
-    int16_t getInput(uint32_t code);
+    bool getSwitch(uint32_t code) override;
+    int getAnalog(uint32_t code) override;
+    int getRelative(uint32_t code) override { return 0; }
+
+    int getSwitchCount(uint32_t code) override { return joystickList[Input::getInputDevId(code)].device.wNumButtons; }
+    int getAnalogCount(uint32_t code) override { return joystickList[Input::getInputDevId(code)].device.wNumAxes; }
+    int getRelativeCount(uint32_t code) override { return 0; }
 };
 
-REGISTER_DEVICE_HANDLER(JoystickHandler)
+REGISTER_DEVICE_HANDLER(Win32Joy)

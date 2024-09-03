@@ -249,6 +249,7 @@ namespace gpu
 	class Image
 	{
 	public:
+		bool valid = false;
 		char *name;
 		uint16_t u, v, width, height;
 		HDC imgHdc = NULL;

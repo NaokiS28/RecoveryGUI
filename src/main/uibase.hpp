@@ -17,319 +17,330 @@
 #pragma once
 
 #include <stdint.h>
+#include <vector>
+#include "common/ui/layerman.hpp"
 #include "common/util/log.hpp"
 #include "common/util/tween.hpp"
 #include "common/util/units.hpp"
-#include "common/io.hpp"
+#include "common/io/vmouse.hpp"
+#include "common/io/vinput.hpp"
 #include "hw/gpu.hpp"
 #include "hw/gpufont.hpp"
 
+namespace ui
+{
 
-namespace ui {
+	/* Public constants */
 
-/* Public constants */
+	static constexpr int NUM_UI_COLORS = 18;
 
-static constexpr int NUM_UI_COLORS = 18;
+	enum Color
+	{
+		COLOR_DEFAULT = 0,
+		COLOR_SHADOW = 1,
+		COLOR_BACKDROP = 2,
+		COLOR_ACCENT1 = 3,
+		COLOR_ACCENT2 = 4,
+		COLOR_WINDOW1 = 5,
+		COLOR_WINDOW2 = 6,
+		COLOR_WINDOW3 = 7,
+		COLOR_HIGHLIGHT1 = 8,
+		COLOR_HIGHLIGHT2 = 9,
+		COLOR_PROGRESS1 = 10,
+		COLOR_PROGRESS2 = 11,
+		COLOR_BOX1 = 12,
+		COLOR_BOX2 = 13,
+		COLOR_TEXT1 = 14,
+		COLOR_TEXT2 = 15,
+		COLOR_TITLE = 16,
+		COLOR_SUBTITLE = 17
+	};
 
-enum Color {
-	COLOR_DEFAULT    =  0,
-	COLOR_SHADOW     =  1,
-	COLOR_BACKDROP   =  2,
-	COLOR_ACCENT1    =  3,
-	COLOR_ACCENT2    =  4,
-	COLOR_WINDOW1    =  5,
-	COLOR_WINDOW2    =  6,
-	COLOR_WINDOW3    =  7,
-	COLOR_HIGHLIGHT1 =  8,
-	COLOR_HIGHLIGHT2 =  9,
-	COLOR_PROGRESS1  = 10,
-	COLOR_PROGRESS2  = 11,
-	COLOR_BOX1       = 12,
-	COLOR_BOX2       = 13,
-	COLOR_TEXT1      = 14,
-	COLOR_TEXT2      = 15,
-	COLOR_TITLE      = 16,
-	COLOR_SUBTITLE   = 17
-};
+	enum AnimationSpeed
+	{
+		SPEED_FASTEST = 10,
+		SPEED_FAST = 15,
+		SPEED_SLOW = 20,
+		SPEED_SLOWEST = 30
+	};
 
-enum AnimationSpeed {
-	SPEED_FASTEST = 10,
-	SPEED_FAST    = 15,
-	SPEED_SLOW    = 20,
-	SPEED_SLOWEST = 30
-};
+	static constexpr int SCREEN_MARGIN_X = 16;
+	static constexpr int SCREEN_MARGIN_Y = 20;
+	static constexpr int SCREEN_MIN_MARGIN_X = 8;
+	static constexpr int SCREEN_MIN_MARGIN_Y = 10;
+	static constexpr int SCREEN_BLOCK_MARGIN = 6;
+	static constexpr int SCREEN_PROMPT_HEIGHT = 30;
+	static constexpr int SCREEN_PROMPT_HEIGHT_MIN = 10;
 
-static constexpr int SCREEN_MARGIN_X          = 16;
-static constexpr int SCREEN_MARGIN_Y          = 20;
-static constexpr int SCREEN_MIN_MARGIN_X      = 8;
-static constexpr int SCREEN_MIN_MARGIN_Y      = 10;
-static constexpr int SCREEN_BLOCK_MARGIN      = 6;
-static constexpr int SCREEN_PROMPT_HEIGHT     = 30;
-static constexpr int SCREEN_PROMPT_HEIGHT_MIN = 10;
+	static constexpr int LIST_BOX_PADDING = 4;
+	static constexpr int LIST_ITEM_PADDING = 2;
 
-static constexpr int LIST_BOX_PADDING  = 4;
-static constexpr int LIST_ITEM_PADDING = 2;
+	static constexpr int MODAL_WIDTH = 256;
+	static constexpr int MODAL_HEIGHT_FULL = 120;
+	static constexpr int MODAL_HEIGHT_REDUCED = 50;
+	static constexpr int MODAL_PADDING = 5;
 
-static constexpr int MODAL_WIDTH          = 256;
-static constexpr int MODAL_HEIGHT_FULL    = 120;
-static constexpr int MODAL_HEIGHT_REDUCED = 50;
-static constexpr int MODAL_PADDING        = 5;
+	static constexpr int TITLE_BAR_HEIGHT = 18;
+	static constexpr int TITLE_BAR_PADDING = 5;
 
-static constexpr int TITLE_BAR_HEIGHT  = 18;
-static constexpr int TITLE_BAR_PADDING = 5;
+	static constexpr int BUTTON_HEIGHT = 18;
+	static constexpr int BUTTON_SPACING = 3;
+	static constexpr int BUTTON_PADDING = 5;
 
-static constexpr int BUTTON_HEIGHT  = 18;
-static constexpr int BUTTON_SPACING = 3;
-static constexpr int BUTTON_PADDING = 5;
+	static constexpr int PROGRESS_BAR_HEIGHT = 8;
 
-static constexpr int PROGRESS_BAR_HEIGHT = 8;
+	static constexpr int SHADOW_OFFSET = 4;
 
-static constexpr int SHADOW_OFFSET = 4;
+	static constexpr int SCROLL_AMOUNT = 32;
 
-static constexpr int SCROLL_AMOUNT = 32;
+	/* Button state manager */
 
-/* Button state manager */
+	static constexpr int NUM_BUTTONS = 4;
+	static constexpr int REPEAT_DELAY = 30;
 
-static constexpr int NUM_BUTTONS  = 4;
-static constexpr int REPEAT_DELAY = 30;
+	/* UI - Windows specific */
+	static constexpr int UI_REFRESH_TIMER = 1;
+	static constexpr int UI_REFRESH_INTERVAL = 16; // ~60 Hz (1000ms / 60)
 
-/* UI - Windows specific */
-static constexpr int UI_REFRESH_TIMER = 1;
-static constexpr int UI_REFRESH_INTERVAL = 16;  // ~60 Hz (1000ms / 60)
+	enum Button
+	{
+		BTN_LEFT = 0,
+		BTN_RIGHT = 1,
+		BTN_START = 2,
+		BTN_DEBUG = 3
+	};
 
-enum Button {
-	BTN_LEFT  = 0,
-	BTN_RIGHT = 1,
-	BTN_START = 2,
-	BTN_DEBUG = 3
-};
+	class ButtonState
+	{
+	private:
+		uint8_t _held, _prevHeld;
+		uint8_t _longHeld, _prevLongHeld;
+		uint8_t _pressed, _released;
+		uint8_t _longPressed, _longReleased;
 
-class ButtonState {
-private:
-	uint8_t _held, _prevHeld;
-	uint8_t _longHeld, _prevLongHeld;
-	uint8_t _pressed, _released;
-	uint8_t _longPressed, _longReleased;
+		int _repeatTimer;
 
-	int _repeatTimer;
+		uint8_t _getHeld(void) const;
 
-	uint8_t _getHeld(void) const;
-
-public:
-	inline bool held(Button button) const {
-		return (_held >> button) & 1;
-	}
-	inline bool pressed(Button button) const {
-		return (_pressed >> button) & 1;
-	}
-	inline bool released(Button button) const {
-		return (_released >> button) & 1;
-	}
-
-	inline bool longHeld(Button button) const {
-		return (_longHeld >> button) & 1;
-	}
-	inline bool longPressed(Button button) const {
-		return (_longPressed >> button) & 1;
-	}
-	inline bool longReleased(Button button) const {
-		return (_longReleased >> button) & 1;
-	}
-
-	ButtonState(void);
-	void reset(void);
-	void update(void);
-};
-
-/* UI context */
-
-class Layer;
-class Screen;
-class Cursor;
-
-class Context {
-private:
-	Screen *_screens[2];
-	int    _currentScreen;
-
-public:
-	gpu::Context &gpuCtx;
-
-	Layer *backgrounds[4], *overlays[4];
-
-	gpu::Font  font;
-	gpu::Color colors[NUM_UI_COLORS];
-
-	ButtonState buttons;
-	io::Context &ioCtx;
-
-	io::Player *players[3];
-
-	bool runUpdate = true;	// When set, UI and menu elements are updated
-
-	int  time;
-	void *screenData; // Opaque, can be accessed by screens
-
-	inline Screen *getCurrentScreen(void) const {
-		return _screens[_currentScreen];
-	}
-	inline Screen *getInactiveScreen(void) const {
-		return _screens[_currentScreen ^ 1];
-	}
-	inline void tick(void) {
-		//buttons.update();
-		time++;
-	}
-
-	Context(gpu::Context &gpuCtx, io::Context &ioCtx, void *screenData = nullptr);
-	void show(Screen &screen, bool goBack = false, bool playSound = false);
-	void draw(void);
-	int update(void);
-	void init();
-};
-
-/* Cursor Context */
-class Cursor {
 	public:
-	gpu::Image arrow;
-	
-	Cursor(){}
-	void setPosition(int x, int y){}
-	void draw(Context &ctx, bool active = true) const {}
-};
+		inline bool held(Button button) const
+		{
+			return (_held >> button) & 1;
+		}
+		inline bool pressed(Button button) const
+		{
+			return (_pressed >> button) & 1;
+		}
+		inline bool released(Button button) const
+		{
+			return (_released >> button) & 1;
+		}
 
-/* Layer classes */
+		inline bool longHeld(Button button) const
+		{
+			return (_longHeld >> button) & 1;
+		}
+		inline bool longPressed(Button button) const
+		{
+			return (_longPressed >> button) & 1;
+		}
+		inline bool longReleased(Button button) const
+		{
+			return (_longReleased >> button) & 1;
+		}
 
-struct LayerCallback {
-	gpu::RectWH area;
-	void* callbackFunc = nullptr; 
-};
+		ButtonState(void);
+		void reset(void);
+		void update(void);
+	};
 
-class Layer {
-protected:
-	LayerCallback _layers;	// Windowing
-	uint8_t _layerSize;
+	/* UI context */
 
-	void _newLayer(Context &ctx, int x, int y, int width, int height) const;
-	void _setOffset(Context &ctx, int x, int y) const;
-	void _setTexturePage(
-		Context &ctx, uint16_t texpage, bool dither = false
-	) const;
-	void _setBlendMode(
-		Context &ctx, gpu::BlendMode blendMode, bool dither = false
-	) const;
+	class Layer;
+	class Screen;
 
-public:
-	virtual void draw(Context &ctx, bool active = true) const {}
-};
+	class Context
+	{
+	private:
+		Screen *_screens[2];
+		int _currentScreen;
 
-class TiledBackground : public Layer {
-public:
-	gpu::Image tile;
-	void draw(Context &ctx, bool active = true) const;
-};
+	public:
+		gpu::Context &gpuCtx;
 
-class TextOverlay : public Layer {
-public:
-	const char *leftText, *rightText;
+		Layer *backgrounds[4], *overlays[4];
 
-	inline TextOverlay(void)
-	: leftText(nullptr), rightText(nullptr) {}
+		gpu::Font font;
+		gpu::Color colors[NUM_UI_COLORS];
 
-	void draw(Context &ctx, bool active = true) const;
-};
+		layers::LayerManager layerMan = layers::LayerManager(&gpuCtx, &font, colors);
 
-class SplashOverlay : public Layer {
-private:
-	util::Tween<int, util::QuadOutEasing> _fadeAnim;
-	util::Tween<int, util::QuadOutEasing> _imgFadeAnim;
+		ButtonState buttons;
+		//io::Context &ioCtx;
 
-public:
-	gpu::Image image;
+		vInput::Context _ioCtx;
 
-	void draw(Context &ctx, bool active = true) const;
-	void show(Context &ctx);
-	void hide(Context &ctx);
-};
+		//io::Player *players[3];
 
-class LogOverlay : public Layer {
-private:
-	util::LogBuffer &_buffer;
-	util::Tween<int, util::QuadOutEasing> _slideAnim;
+		bool runUpdate = true; // When set, UI and menu elements are updated
 
-public:
-	inline LogOverlay(util::LogBuffer &buffer)
-	: _buffer(buffer) {}
+		int time;
+		void *screenData; // Opaque, can be accessed by screens
 
-	void draw(Context &ctx, bool active = true) const;
-	void toggle(Context &ctx);
-};
+		inline Screen *getCurrentScreen(void) const
+		{
+			return _screens[_currentScreen];
+		}
+		inline Screen *getInactiveScreen(void) const
+		{
+			return _screens[_currentScreen ^ 1];
+		}
+		inline void tick(void)
+		{
+			// buttons.update();
+			time++;
+		}
 
-class ScreenshotOverlay : public Layer {
-private:
-	util::Tween<int, util::QuadOutEasing> _flashAnim;
+		Context(gpu::Context &gpuCtx, void *screenData = nullptr);
+		void show(Screen &screen, bool goBack = false, bool playSound = false);
+		void draw(void);
+		int update(void);
+		void init();
+	};
 
-public:
-	void draw(Context &ctx, bool active = true) const;
-	void animate(Context &ctx);
-};
+	/* Layer classes */
 
-class InputDebugOverlay : public Layer {
-private:
+	class Layer
+	{
+	protected:
+		void _setOffset(Context &ctx, int x, int y) const;
 
-public:
-	void draw(Context &ctx, bool active = true) const;
-};
+		/* PS1 specific and should be removed */
+		void _setTexturePage(
+			Context &ctx, uint16_t texpage, bool dither = false) const;
+		void _setBlendMode(
+			Context &ctx, gpu::BlendMode blendMode, bool dither = false) const;
 
+	public:
+		virtual void draw(Context &ctx, bool active = true) const = 0;
+	};
 
-/* Base screen classes */
+	class TiledBackground : public Layer
+	{
+	public:
+		//TiledBackground(Context &ctx);
+		gpu::Image tile;
+		void draw(Context &ctx, bool active = true) const;
+	};
 
-// This is probably the most stripped-down way to implement something that
-// vaguely resembles MVC. The class is the model, draw() is the view, update()
-// is the controller.
-class Screen : public Layer {
-public:
-	virtual void show(Context &ctx, bool goBack = false) {}
-	virtual void hide(Context &ctx, bool goBack = false) {}
-	virtual void draw(Context &ctx, bool active = true) const {}
-	virtual void update(Context &ctx) {}
-};
+	class TextOverlay : public Layer
+	{
+	public:
+		const char *leftText, *rightText;
 
-class AnimatedScreen : public Screen {
-private:
-	util::Tween<int, util::QuadOutEasing> _slideAnim;
+		inline TextOverlay(void)
+			: leftText(nullptr), rightText(nullptr) {}
 
-protected:
-	void _newLayer(Context &ctx, int x, int y, int width, int height) const;
+		void draw(Context &ctx, bool active = true) const;
+	};
 
-public:
-	virtual void show(Context &ctx, bool goBack = false);
-	virtual void hide(Context &ctx, bool goBack = false);
-};
+	class SplashOverlay : public Layer
+	{
+	private:
+		util::Tween<int, util::QuadOutEasing> _fadeAnim;
+		util::Tween<int, util::QuadOutEasing> _imgFadeAnim;
 
-class BackdropScreen : public Screen {
-private:
-	util::Tween<int, util::LinearEasing> _fadeAnim;
+	public:
+		gpu::Image image;
 
-public:
-	virtual void show(Context &ctx, bool goBack = false);
-	virtual void hide(Context &ctx, bool goBack = false);
-	virtual void draw(Context &ctx, bool active = true) const;
-};
+		void draw(Context &ctx, bool active = true) const;
+		void show(Context &ctx);
+		void hide(Context &ctx);
+	};
 
-class ModalScreen : public BackdropScreen {
-private:
-	util::Tween<int, util::QuadOutEasing> _titleBarAnim;
+	class LogOverlay : public Layer
+	{
+	private:
+		util::LogBuffer &_buffer;
+		util::Tween<int, util::QuadOutEasing> _slideAnim;
 
-protected:
-	int _width, _height;
+	public:
+		inline LogOverlay(util::LogBuffer &buffer)
+			: _buffer(buffer) {}
 
-	const char *_title, *_body;
+		void draw(Context &ctx, bool active = true) const;
+		void toggle(Context &ctx);
+	};
 
-public:
-	ModalScreen(int width, int height);
-	virtual void show(Context &ctx, bool goBack = false);
-	virtual void draw(Context &ctx, bool active = true) const;
-};
+	class ScreenshotOverlay : public Layer
+	{
+	private:
+		util::Tween<int, util::QuadOutEasing> _flashAnim;
+
+	public:
+		void draw(Context &ctx, bool active = true) const;
+		void animate(Context &ctx);
+	};
+
+	class InputDebugOverlay : public Layer
+	{
+	private:
+	public:
+		void draw(Context &ctx, bool active = true) const;
+	};
+
+	/* Base screen classes */
+
+	// This is probably the most stripped-down way to implement something that
+	// vaguely resembles MVC. The class is the model, draw() is the view, update()
+	// is the controller.
+	class Screen : public Layer
+	{
+	public:
+		virtual void show(Context &ctx, bool goBack = false) {}
+		virtual void hide(Context &ctx, bool goBack = false) {}
+		virtual void draw(Context &ctx, bool active = true) const {}
+		virtual void update(Context &ctx) {}
+	};
+
+	class AnimatedScreen : public Screen
+	{
+	private:
+		util::Tween<int, util::QuadOutEasing> _slideAnim;
+
+	protected:
+		void _setOffset(Context &ctx, int x, int y, int width, int height) const;
+
+	public:
+		virtual void show(Context &ctx, bool goBack = false);
+		virtual void hide(Context &ctx, bool goBack = false);
+	};
+
+	class BackdropScreen : public Screen
+	{
+	private:
+		util::Tween<int, util::LinearEasing> _fadeAnim;
+
+	public:
+		virtual void show(Context &ctx, bool goBack = false);
+		virtual void hide(Context &ctx, bool goBack = false);
+		virtual void draw(Context &ctx, bool active = true) const;
+	};
+
+	class ModalScreen : public BackdropScreen
+	{
+	private:
+		util::Tween<int, util::QuadOutEasing> _titleBarAnim;
+
+	protected:
+		int _width, _height;
+
+		const char *_title, *_body;
+
+	public:
+		ModalScreen(int width, int height);
+		virtual void show(Context &ctx, bool goBack = false);
+		virtual void draw(Context &ctx, bool active = true) const;
+	};
 
 }

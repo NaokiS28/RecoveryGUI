@@ -42,8 +42,8 @@ int main(int argc, const char **argv)
 	LOG_APP("Screen resolution is: %dx%d", args.screenWidth, args.screenHeight);
 
 	auto gpuCtx = new gpu::Context(args.screenWidth, args.screenHeight);
-	auto ioCtx = new io::Context();
-	auto uiCtx = new ui::Context(*gpuCtx, *ioCtx);
+	//auto ioCtx = new io::Context();
+	auto uiCtx = new ui::Context(*gpuCtx);
 	auto app = new App(*uiCtx);
 	
 	#ifdef _WINDOWS_

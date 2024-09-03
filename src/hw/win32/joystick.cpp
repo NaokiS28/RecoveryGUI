@@ -16,17 +16,15 @@
 
 #include "joystick.hpp"
 
-int JoystickHandler::init()
+int Win32Joy::init()
 {
-    LOG_APP("JoystickHandler init");
-
     // Note: Windows reports how many joysticks the system can currently support,
     //          not the total connected joysticks.
     uint16_t joyReport = joyGetNumDevs();
 
     if (!joyReport)
     {
-        LOG_APP("No joystick driver installed.");
+        //LOG_APP("No joystick driver installed.");
         return 1;
     }
 
@@ -42,57 +40,65 @@ int JoystickHandler::init()
         if ((joy = joyGetPosEx(j, &joyState)) == JOYERR_NOERROR)
         {
             joyGetDevCaps(j, &joyDeviceInfo, sizeof(JOYCAPS));
-            JoystickDevice joystickDevice(joyState, joyDeviceInfo);
+
+            JoystickDevice joystickDevice(j, joyState, joyDeviceInfo);
+            
+            LOG_APP("Found joystick: %s (%d axis, %d buttons)",
+                    joystickDevice.device.szPname, 
+                    joystickDevice.device.wNumAxes, 
+                    joystickDevice.device.wNumButtons);
             _newJoystick(joystickDevice);
+            
         }
-    }
+    } 
     return 0;
 }
 
-int JoystickHandler::update()
+void Win32Joy::update()
 {
-    uint16_t result = JOYERR_NOERROR;
+    //uint16_t result = JOYERR_NOERROR;
 
     if (polledMode)
     {
-        for (uint8_t i = 0; i < joystickCount; i++)
+        for (auto &joy : joystickList)
         {
-            uint16_t joy = joyGetPosEx(i, &joystickList[i].state);
-            if (joy > result)
-                result = joy;
+            //uint16_t status = 
+            joyGetPosEx(joy.id, &joy.state);
+            /*if (status > result)
+                result = (joy.id * 10) + status;
+                */
         }
     }
 
-    return result;
+    //return result;
 }
 
-int16_t JoystickHandler::getInput(uint32_t code)
+void Win32Joy::_reset(){ 
+    for(auto& dev : joystickList){
+        _outBox->postMessage(Input::IM_DEVICE_DISCONNECT, dev.id);
+    }
+    joystickList.erase(joystickList.begin(), joystickList.end());
+}
+
+int Win32Joy::reload()
 {
-    // Todo
-    uint8_t id = VirtualIO::getInputDevId(code);
-    uint8_t InputType = VirtualIO::getInputType(code);
-
-    if (id > (joystickCount - 1))
-    {
-        return VirtualIO::INPUT_STATE_INACTIVE;
-    }
-
-    if (InputType == VirtualIO::INPUT_TYPE_ANALOG)
-    {
-        return getAnalog(code);
-    }
-    else if (InputType == VirtualIO::INPUT_TYPE_DIGITAL)
-    {
-        return getSwitch(code);
-    }
+    _reset();
+    init();
     return 0;
 }
 
-bool JoystickHandler::getSwitch(uint32_t code)
+const char* Win32Joy::getDeviceName(int idx){
+    if((size_t)idx < joystickList.size()){
+        return joystickList[idx].device.szPname;
+    }
+    return nullptr;
+}
+
+bool Win32Joy::getSwitch(uint32_t code)
 {
-    uint8_t id = VirtualIO::getInputDevId(code);
-    uint8_t inputIdx = VirtualIO::getInputIdx(code);
-    if (id < joystickCount && inputIdx < joystickList[id].device.wNumButtons)
+    uint8_t id = Input::getInputDevId(code);
+    uint8_t inputIdx = Input::getInputIdx(code);
+    if (id < joystickList.size() && inputIdx < joystickList[id].device.wNumButtons)
     {
         return ((joystickList[id].getInputs() >> inputIdx) & 0x1);
     }
@@ -102,13 +108,13 @@ bool JoystickHandler::getSwitch(uint32_t code)
     }
 }
 
-int JoystickHandler::getAnalog(uint32_t code)
+int Win32Joy::getAnalog(uint32_t code)
 {
-    uint8_t id = VirtualIO::getInputDevId(code);
-    uint8_t inputIdx = VirtualIO::getInputIdx(code);
+    uint8_t id = Input::getInputDevId(code);
+    uint8_t inputIdx = Input::getInputIdx(code);
     int16_t val = 0x0000;
 
-    if (id < joystickCount && inputIdx < joystickList[id].device.wNumAxes)
+    if (id < joystickList.size() && inputIdx < joystickList[id].device.wNumAxes)
     {
         switch (inputIdx)
         {
@@ -137,17 +143,7 @@ int JoystickHandler::getAnalog(uint32_t code)
     return val;
 }
 
-void JoystickHandler::_newJoystick(JoystickDevice &joy)
-{
-    JoystickDevice *newJoystickList = new JoystickDevice[joystickCount + 1];
-    for (uint8_t i = 0; i < joystickCount; i++)
-    {
-        newJoystickList[i] = joystickList[i];
-    }
-    newJoystickList[joystickCount] = joy;
-    delete[] joystickList;
-    joystickList = newJoystickList;
-    joystickCount++;
-    LOG_APP("Found joystick: %s (%d axis, %d buttons)",
-            joy.device.szPname, joy.device.wNumAxes, joy.device.wNumButtons);
+void Win32Joy::_newJoystick(JoystickDevice &joy){
+    joystickList.push_back(joy);
+
 }

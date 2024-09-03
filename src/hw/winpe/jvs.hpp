@@ -20,7 +20,7 @@
 */
 
 #pragma once
-#include "common/devhandler.hpp"
+#include "common/io/devhandler.hpp"
 
 class JVSHandler : public DeviceHandler
 {

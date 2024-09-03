@@ -23,6 +23,8 @@
 #include "hw/gpufont.hpp"
 #include "main/uibase.hpp"
 
+#include "common/io/inputdefs.hpp"
+
 namespace ui
 {
 
@@ -91,8 +93,8 @@ namespace ui
 	}
 
 	/* UI context */
-	Context::Context(gpu::Context &gpuCtx, io::Context &ioCtx, void *screenData)
-		: _currentScreen(0), gpuCtx(gpuCtx), ioCtx(ioCtx), time(0), screenData(screenData)
+	Context::Context(gpu::Context &gpuCtx, void *screenData)
+		: _currentScreen(0), gpuCtx(gpuCtx), time(0), screenData(screenData)
 	{
 		util::clear(_screens);
 		util::clear(backgrounds);
@@ -101,15 +103,9 @@ namespace ui
 
 	void Context::init()
 	{
-		players[0] = new io::Player(io::PLAYER_CABINET, 4);
-		players[1] = new io::Player(io::PLAYER_1, 8);
-		players[2] = new io::Player(io::PLAYER_2, 8);
-
-		ioCtx.addNewPlayer(players[0]);
-		ioCtx.addNewPlayer(players[1]);
-		ioCtx.addNewPlayer(players[2]);
 		gpuCtx.init();
-		ioCtx.init();
+		//ioCtx.init();
+		_ioCtx.init();
 
 		SetTimer(gpuCtx.windowHandle, UI_REFRESH_TIMER, UI_REFRESH_INTERVAL, NULL);
 	}
@@ -137,6 +133,7 @@ namespace ui
 		auto oldScreen = getInactiveScreen();
 		auto newScreen = getCurrentScreen();
 
+
 		// Background layers (tiled background, time/version)
 		for (auto layer : backgrounds)
 		{
@@ -158,6 +155,8 @@ namespace ui
 				layer->draw(*this);
 		}
 
+		layerMan.render();
+
 		gpuCtx.endDraw();
 	}
 
@@ -165,7 +164,8 @@ namespace ui
 	{
 		// A lot of this is just handling Windows Messages
 
-		ioCtx.update();
+		_ioCtx.update();
+		layerMan.update(time);
 
 		MSG msg = {};
 		BOOL bRet;
@@ -203,11 +203,6 @@ namespace ui
 
 	/* Layer classes */
 
-	void Layer::_newLayer(Context &ctx, int x, int y, int width, int height) const
-	{
-		ctx.gpuCtx.newLayer(x, y, width, height);
-	}
-
 	void Layer::_setOffset(Context &ctx, int x, int y) const
 	{
 		ctx.gpuCtx.setOffset(x, y);
@@ -224,9 +219,25 @@ namespace ui
 		ctx.gpuCtx.setBlendMode(blendMode, dither);
 	}
 
+	/*
+		TiledBackground::TiledBackground(Context &ctx)
+		{
+			ui = &ctx;
+			LayerCallback layer = {
+				LayerType::Background,
+				LayerPriority::Bottom,
+				{0, 0,
+				 ui->gpuCtx.getHorizontalRes(),
+				 ui->gpuCtx.getVerticalRes()},
+				[this](){ draw(*ui); }
+			};
+			newLayer(layer);
+		}
+	*/
+
 	void TiledBackground::draw(Context &ctx, bool active) const
 	{
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		//_setTexturePage(ctx, tile.texpage);
 
 		int offsetX = uint32_t(ctx.time / 2) % tile.width;
@@ -241,7 +252,7 @@ namespace ui
 
 	void TextOverlay::draw(Context &ctx, bool active) const
 	{
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		int lineHeight = ctx.font.getLineHeight();
 
 		gpu::RectWH rect;
@@ -274,7 +285,7 @@ namespace ui
 			return;
 
 		// Backdrop
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		ctx.gpuCtx.drawBackdrop(
 			gpu::rgba(0, 0, 0, brightness));
 
@@ -318,9 +329,8 @@ namespace ui
 			return;
 
 		// Backdrop
-		_newLayer(
-			ctx, 0, offset - ctx.gpuCtx.height, ctx.gpuCtx.width,
-			ctx.gpuCtx.height);
+		_setOffset(
+			ctx, 0, offset - ctx.gpuCtx.height);
 		ctx.gpuCtx.drawBackdrop(ctx.colors[COLOR_BACKDROP], gpu::GP0_BLEND_SUBTRACT);
 
 		// Text
@@ -359,7 +369,7 @@ namespace ui
 		if (!brightness)
 			return;
 
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		ctx.gpuCtx.drawBackdrop(
 			gpu::rgb(brightness, brightness, brightness), gpu::GP0_BLEND_ADD);
 	}
@@ -372,7 +382,7 @@ namespace ui
 
 	void InputDebugOverlay::draw(Context &ctx, bool active) const
 	{
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		int lineHeight = ctx.font.getLineHeight();
 		int lineWidth = ctx.font.getLineHeight() * 15;
 		int16_t originX = static_cast<int16_t>(ctx.gpuCtx.width - lineWidth);
@@ -397,18 +407,29 @@ namespace ui
 		text.y1 = text.y2 + lineHeight;
 		text.y2 = text.y1 + lineHeight;
 
-		int joyStickListLength = ctx.ioCtx.getDeviceCount(INPUT_CLASS_JOYSTICK);
+		/*
+		int joyStickListLength = ctx.ioCtx.getDeviceCount(vInput::JoystickClass);
 		char textBuffer[32];
 
 		for (int i = 0; i < joyStickListLength; i++)
 		{
+			textBuffer[0] = '\0';
+			snprintf(
+				textBuffer, 32, "%s:", ctx.ioCtx.getDeviceName(vInput::JoystickClass, i));
+
+			ctx.font.draw(
+				ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
+
+			text.y1 = text.y2;
+			text.y2 += lineHeight;
+
 			int analogCount = ctx.ioCtx.getRawInputCount(
-				VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_ANALOG, 0));
+				Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_ANALOG, 0));
 			for (int a = 0; a < analogCount; a++)
 			{
 				textBuffer[0] = '\0';
-				int code = VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_DIGITAL, a);
-				int16_t value = ctx.ioCtx.getRawInputValue(code);
+				int code = Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_DIGITAL, a);
+				int16_t value = ctx.ioCtx.getRawInputInt(code);
 				snprintf(
 					textBuffer, 32, "%d: %s - %x", a + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
 					value);
@@ -421,11 +442,11 @@ namespace ui
 			}
 
 			int switchCount = ctx.ioCtx.getRawInputCount(
-				VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_DIGITAL, 0));
+				Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_DIGITAL, 0));
 			for (int s = 0; s < switchCount; s++)
 			{
 				textBuffer[0] = '\0';
-				int code = VirtualIO::getInputCode(INPUT_CLASS_JOYSTICK, i, VirtualIO::INPUT_TYPE_DIGITAL, s);
+				int code = Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_DIGITAL, s);
 				bool state = ctx.ioCtx.getRawInputState(code);
 				snprintf(
 					textBuffer, 32, "%d: %s - %s", s + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
@@ -438,14 +459,15 @@ namespace ui
 				text.y2 += lineHeight;
 			}
 		}
+		*/
 	}
 
 	/* Base screen classes */
 
-	void AnimatedScreen::_newLayer(
+	void AnimatedScreen::_setOffset(
 		Context &ctx, int x, int y, int width, int height) const
 	{
-		Screen::_newLayer(ctx, x + _slideAnim.getValue(ctx.time), y, width, height);
+		Screen::_setOffset(ctx, x + _slideAnim.getValue(ctx.time), y);
 	}
 
 	void AnimatedScreen::show(Context &ctx, bool goBack)
@@ -479,7 +501,7 @@ namespace ui
 		if (!brightness)
 			return;
 
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		ctx.gpuCtx.drawBackdrop(
 			gpu::rgb(brightness, brightness, brightness), gpu::GP0_BLEND_ADD);
 	}
@@ -496,17 +518,16 @@ namespace ui
 
 	void ModalScreen::draw(Context &ctx, bool active) const
 	{
-		_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+		_setOffset(ctx, 0, 0);
 		BackdropScreen::draw(ctx, active);
 
 		if (active)
 		{
 			int windowHeight = TITLE_BAR_HEIGHT + _height;
 
-			_newLayer(
+			_setOffset(
 				ctx, (ctx.gpuCtx.width - _width) / 2,
-				(ctx.gpuCtx.height - windowHeight) / 2, _width + SHADOW_OFFSET,
-				windowHeight + SHADOW_OFFSET);
+				(ctx.gpuCtx.height - windowHeight) / 2);
 
 			//_setBlendMode(ctx, gpu::GP0_BLEND_SEMITRANS, true);
 

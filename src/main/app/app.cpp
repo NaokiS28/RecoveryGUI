@@ -22,6 +22,7 @@
 #include "common/util/log.hpp"
 #include "common/util/misc.hpp"
 #include "common/util/templates.hpp"
+#include "common/ui/layers.hpp"
 #include "common/defs.hpp"
 #include "hw/gpu.hpp"
 #include "main/app/app.hpp"
@@ -177,6 +178,28 @@ void App::run(const char *resourceFile)
 	_ctx.init();
 
 	_ctx.screenData = this;
+	
+	
+	/*_ctx.layerMan.newLayer<uibg::TiledBackground>( 
+		0, 0,
+		_ctx.gpuCtx.getHorizontalRes(),
+		_ctx.gpuCtx.getVerticalRes(),
+		uibg::ScrollDirections::DownRight 
+		);*/
+	
+	_ctx.layerMan.newLayer<vKeyboard::vKeyboard>( 
+		0, 0,
+		_ctx.gpuCtx.getHorizontalRes(),
+		_ctx.gpuCtx.getVerticalRes()
+		);
+	
+	vKeyboard::vKeyboard* oskptr = dynamic_cast<vKeyboard::vKeyboard*>(
+		_ctx.layerMan.getPtrToLayer(vKeyboard::OSKName));
+	Device::KeyboardHandler* oskdevptr = dynamic_cast<Device::KeyboardHandler*>(
+		_ctx._ioCtx.getKeyDevPtr(vKeyboard::OSKName));
+	if(oskptr != nullptr && oskdevptr != nullptr){
+		oskptr->setOSKDev(oskdevptr);
+	}
 
 	_fileIO.loadResourceFile(resourceFile);
 	_loadResources();

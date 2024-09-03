@@ -23,7 +23,7 @@ int findComPorts(char *foundComList, uint8_t &foundComSize, uint8_t maxSize = 50
     char *fileName = new char[16];
     if (fileName == nullptr)
     {
-        LOG_APP("Failed to create file string");
+        //LOG_APP("Failed to create file string");
         return -1;
     }
 
@@ -31,7 +31,7 @@ int findComPorts(char *foundComList, uint8_t &foundComSize, uint8_t maxSize = 50
     {
         if (((portName = new char[16]) == nullptr) || (fileName = new char(16)) == nullptr)
         {
-            LOG_APP("Failed to create port string");
+            //LOG_APP("Failed to create port string");
             return -1;
         }
 
@@ -68,15 +68,12 @@ int findComPorts(char *foundComList, uint8_t &foundComSize, uint8_t maxSize = 50
     return foundComSize;
 }
 
-JVSHandler::JVSHandler(const char *port)
+Win32JVS::Win32JVS()
 {
-    if (port == nullptr)
-    {
-        LOG_APP("Warning: No COM port given");
-    }
+
 }
 
-int JVSHandler::init()
+int Win32JVS::init()
 {
     if (_hostPort.comPort == nullptr)
     {
@@ -105,7 +102,7 @@ int JVSHandler::init()
     return 0;
 }
 
-int JVSHandler::update()
+void Win32JVS::update()
 {
-    return 0;
+    
 }

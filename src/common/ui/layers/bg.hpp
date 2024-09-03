@@ -14,39 +14,40 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "keyboard.hpp"
+#pragma once
 
-int Win32Keyboard::init()
+#include "hw/gpu.hpp"
+#include "common/ui/layerman.hpp"
+
+namespace uibg
 {
-    return 0;
-}
-
-void Win32Keyboard::update(){
+    using namespace layers;
     
-}
+    enum ScrollDirections {
+        Static,
+        Up,
+        UpRight,
+        Right,
+        DownRight,
+        Down,
+        DownLeft,
+        Left,
+        UpLeft
+    };
 
-void Win32Keyboard::processKeyDown(WPARAM p)
-{
-    // int doSomething;
-}
+    class TiledBackground : public Layer
+    {
+    private:
+        uint32_t offsetStep = 0;
+        ScrollDirections _scrollDirection;
 
-void Win32Keyboard::processKeyUp(WPARAM p)
-{
-}
-
-int Win32Keyboard::processMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-    case WM_KEYUP:
-    {
-        return 0;
-    }
-    case WM_KEYDOWN:
-    {
-        return 0;
-    }
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
+    public:
+        gpu::Image tile;
+        TiledBackground(int x, int y, int w, int h, ScrollDirections d);
+        void draw(gpu::Context &ctx, uint32_t time) const;
+        void resize(int hRes, int vRes){
+            w = hRes;
+            h = vRes;
+        }
+    };
 }

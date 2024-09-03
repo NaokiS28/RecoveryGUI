@@ -40,7 +40,7 @@ void TextScreen::draw(Context &ctx, bool active) const {
 	int lineHeight   = ctx.font.getLineHeight();
 
 	// Top/bottom text
-	_newLayer(
+	_setOffset(
 		ctx, SCREEN_MARGIN_X, SCREEN_MARGIN_Y, screenWidth, screenHeight
 	);
 
@@ -61,7 +61,7 @@ void TextScreen::draw(Context &ctx, bool active) const {
 		(bodyOffset + SCREEN_PROMPT_HEIGHT_MIN + SCREEN_BLOCK_MARGIN);
 
 	// Scrollable text
-	_newLayer(
+	_setOffset(
 		ctx, SCREEN_MARGIN_X, SCREEN_MARGIN_Y + bodyOffset, screenWidth,
 		bodyHeight
 	);
@@ -126,7 +126,7 @@ ImageScreen::ImageScreen(void)
 _prompt(nullptr) {}
 
 void ImageScreen::draw(Context &ctx, bool active) const {
-	_newLayer(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
+	_setOffset(ctx, 0, 0, ctx.gpuCtx.getHorizontalRes(), ctx.gpuCtx.getVerticalRes());
 
 	int lineHeight = ctx.font.getLineHeight();
 
@@ -236,7 +236,7 @@ void ListScreen::draw(Context &ctx, bool active) const {
 	int listHeight   = _getListHeight(ctx);
 	int lineHeight   = ctx.font.getLineHeight();
 
-	_newLayer(
+	_setOffset(
 		ctx, SCREEN_MARGIN_X, SCREEN_MARGIN_Y, screenWidth, screenHeight
 	);
 
@@ -253,7 +253,7 @@ void ListScreen::draw(Context &ctx, bool active) const {
 	rect.y2 = screenHeight;
 	ctx.font.draw(ctx.gpuCtx, _prompt, rect, ctx.colors[COLOR_TEXT1]);
 
-	_newLayer(
+	_setOffset(
 		ctx, SCREEN_MARGIN_X,
 		SCREEN_MARGIN_Y + lineHeight + SCREEN_BLOCK_MARGIN, screenWidth,
 		listHeight

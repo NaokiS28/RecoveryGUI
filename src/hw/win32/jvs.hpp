@@ -29,8 +29,10 @@
 #include <future>
 #include <iostream>
 #include <atomic>
-#include "common/devhandler.hpp"
-#include "common/util/log.hpp"
+#include "common/io/devhandler.hpp"
+//#include "common/util/log.hpp"
+
+using namespace Device;
 
 /*
     Todo:
@@ -67,7 +69,7 @@ struct JVSHostPort {
     uint16_t jvsSenseMode = JVS_CFG_USE_NONE;
 };
 
-class JVSHandler : public DeviceHandler
+class Win32JVS : public JoystickHandler
 {
 private:
     JVSHostPort _hostPort;
@@ -75,22 +77,25 @@ private:
     //JVSTask _currTask = JVS_TASK_NONE;
 
     //std::thread *_workerThread = nullptr;
+    
 
 public:
-    JVSHandler(const char* port = nullptr);
+    Win32JVS();     // Null device until JVS board is found
     int init();
     int reload() { return 0; }
-    int isReady(){ return 0; }
-    int update();
+    void update();
 
-    const char *getClassName() { return "JVS"; }
     int getDeviceCount() { return ioCount; }
-    
-    int getClassType() { return INPUT_CLASS_JOYSTICK; }
 
     bool getSwitch(uint32_t code) { return false; }
     int getAnalog(uint32_t code) { return 0; }
     int getRelative(uint32_t code) { return 0; }
+
+    // Keyboard
+    int getKeyboardType(){ return Keyboard::Numeric; }  // Should be dynamic
+    
+    // Mouse
+    int getMouseType(){ return Mouse::Absolute; }
 };
 
 //REGISTER_DEVICE_HANDLER(JVSHandler)

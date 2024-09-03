@@ -26,6 +26,8 @@
 #include "main/uibase.hpp"
 #include "modals.hpp"
 
+#include "common/ui/layers/vkey.hpp"
+
 /* Filesystem manager class */
 
 extern const char *const IDE_MOUNT_POINTS[];
@@ -69,7 +71,7 @@ private:
 	FilePickerScreen  _filePickerScreen;
 	FileBrowserScreen _fileBrowserScreen;
 
-	ui::TiledBackground   _background;
+	ui::TiledBackground   _background;// = ui::TiledBackground(_ctx);
 	ui::TextOverlay       _textOverlay;
 	ui::SplashOverlay     _splashOverlay;
 #ifdef ENABLE_LOG_BUFFER
@@ -77,9 +79,10 @@ private:
 	ui::LogOverlay        _logOverlay;
 #endif
 
+	ui::Context       &_ctx;
+
 	ui::InputDebugOverlay _inputDbgOverlay;
 
-	ui::Context       &_ctx;
 	file::StringTable _stringTable;
 	FileIOManager     _fileIO;
 
