@@ -24,7 +24,7 @@
 
 #include "inputdefs.hpp"
 #include "devhandler.hpp"
-#include "common/util/locale.hpp"
+#include "common/ui/lang/locale.hpp"
 
 /*
     Virtual Keyboard + Overlay for UI

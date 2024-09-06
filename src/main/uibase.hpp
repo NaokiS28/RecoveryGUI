@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include "common/ui/layers/vkey.hpp"
 #include "common/ui/layerman.hpp"
 #include "common/util/log.hpp"
 #include "common/util/tween.hpp"

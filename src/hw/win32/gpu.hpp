@@ -144,6 +144,10 @@ namespace gpu
 
 		inline Context();
 
+		inline void setOffset(RectWH &rect){
+			setOffset(rect.x, rect.y);
+		}
+
 		inline void setOffset(int x, int y)
 		{
 			return newLayer(x, y, width, height);
@@ -166,11 +170,11 @@ namespace gpu
 			drawGradientRectD(rect.x, rect.y, rect.w, rect.h, top, middle, bottom, a);
 		}
 
-		inline void drawGradientRectHVar(RectWH &rect, Color left, Color right, int startPoint, int endPoint, uint8_t a)
+		inline void drawGradientRectHVar(RectWH &rect, Color left, Color right, int startPoint, int endPoint, uint8_t a = 255)
 		{
 			drawGradientRectHVar(rect.x, rect.y, rect.w, rect.h, left, right, startPoint, endPoint, a);
 		}
-		inline void drawGradientRectVVar(RectWH &rect, Color top, Color bottom, int startPoint, int endPoint, uint8_t a)
+		inline void drawGradientRectVVar(RectWH &rect, Color top, Color bottom, int startPoint, int endPoint, uint8_t a = 255)
 		{
 			drawGradientRectVVar(rect.x, rect.y, rect.w, rect.h, top, bottom, startPoint, endPoint, a);
 		}

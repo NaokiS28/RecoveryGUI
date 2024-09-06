@@ -16,20 +16,24 @@
 
 /*
     Todo:
-    [ ] - Load and draw graphics
     [ ] - Interface with IO vKey
+    [ ] - Code is a bit messy. Cleaning up would be nice
+    [ ] - Asian language support
+    [ ] - Cyrillic support
 */
 
 #pragma once
 
 #include <cstring>
+#include <array>
+#include <vector>
 
 #include "hw/gpu.hpp"
 #include "hw/gpufont.hpp"
 #include "common/io/devhandler.hpp"
 #include "common/util/tween.hpp"
 #include "common/util/units.hpp"
-#include "common/util/locale.hpp"
+#include "common/ui/lang/locale.hpp"
 #include "common/ui/layerman.hpp"
 
 using namespace Device;
@@ -51,8 +55,8 @@ public:
     void update() {}
     int reload() { return 0; }
 
-    void clearBuffer(){}
-    void type(uint16_t codePoint){}
+    void clearBuffer() {}
+    void type(uint16_t codePoint) {}
 
     int getDeviceCount() { return 1; }
     int getKeyboardType(int idx) { return Keyboard::AlphaNumeric; }
@@ -61,66 +65,93 @@ public:
 
 namespace vKeyboard
 {
-    constexpr const int OSKHeight = 110;
-    constexpr const int OSKWidth = 300;
     constexpr const int OSKPadding = 10;
-    constexpr const int OSKSpacing = 5;
-    constexpr const int OSK_KeySize = 15;
+    constexpr const int OSKSpacing = 3;
+    constexpr const int OSKKeySize = 15;
 
-    enum KeyType {
-        NextRow,
-        Single,
-        WideSingle,
-        DoubleWide,
-        Enter,
-        Space,
-        Backspace,
-        Shift,
-        HalfBlank,
-        Blank,
-        Cursor,
-        Diacritics,
-        End
+    enum AnimState
+    {
+        Hidden,
+        Opening,
+        Open,
+        Hiding
     };
 
-    constexpr const int OSKLayout[][14] = {
-        {Single, 12, Backspace, 1, NextRow},
-        {Single, 12, Enter, 1, NextRow},
-        {Single, 12, NextRow},
-        {Shift, 1, Single, 11, Shift, 1, NextRow},
-        {Diacritics, 1, Blank, 1, HalfBlank, 1, Space, 1, Blank, 1, Cursor, 4, End}
+    struct KeyMetric
+    {
+        int x, y, w, h, r, c;
+        int type;
+        const char *text = nullptr;
     };
-
-    constexpr const char *OSKModifiers[] = { "Ä▲►▼◄↵⌫⇧" };
 
     class vKeyboard : public layers::Layer
     {
     private:
-        bool _enabled = true;
-        int keyX = 0, keyY = 0;     // Active/selected key
-        uint8_t _inputLocale = locale::IT;
-        
+        bool _enabled = false;
+        int _selKeyRow = 0, _selKeyCol = 0; // Active/selected key (starts at 1,1, 0,0 means no key)
+
+        AnimState _animationState = Hidden;
         util::Tween<int, util::QuadOutEasing> _popupAnim;
+
+        int _keyModifiers = locale::ModNone;
+
+        locale::LocaleStruct _inputLocale = locale::locales.front();
+        std::vector<KeyMetric> _keyLayout;
+        gpu::RectWH _keyboardRect; // BG and total size
+
         OSKeyboard *_oskDev = nullptr;
+
+        inline bool _keySelected(int r, int c) const
+        {
+            return ((r + 1 == _selKeyRow) && (c + 1 == _selKeyCol));
+        }
+
+        inline void _calcKeyboardRect()
+        {
+            _keyboardRect.x = 0;
+            _keyboardRect.y = 0;
+            _keyboardRect.w = ((OSKPadding * 2) +
+                               (OSKKeySize * _inputLocale.keyLayout.cols) +
+                               (OSKSpacing * (_inputLocale.keyLayout.cols - 1)));
+            _keyboardRect.h = ((OSKPadding * 2) +
+                               (OSKKeySize * _inputLocale.keyLayout.rows) +
+                               (OSKSpacing * (_inputLocale.keyLayout.rows - 1)));
+        }
+        int _getKeyIdx(int row, int col);
+        void _setActiveKey(int row, int col);
+        void _loadLayout();
+        void _drawKey(
+            gpu::Context *ctx, gpu::Font *font,
+            gpu::Color *color,
+            const KeyMetric *key,
+            bool selected) const;
+        void _type();
 
     public:
         vKeyboard(int x, int y, int w, int h) : Layer(x, y, w, h, layers::LayerType::Overlay, layers::LayerPriority::Top) {}
         void draw(gpu::Context *ctx, gpu::Font *font, gpu::Color *color, uint32_t time) const;
         void resize(int hRes, int vRes)
         {
-            w = hRes;
-            h = vRes;
+            _calcKeyboardRect();
+            x = (hRes / 2) - (_keyboardRect.w / 2);
+            y = ((vRes - OSKPadding) - _keyboardRect.h);
         }
+        void update(uint32_t time);
         void show();
         void hide();
-        void nextItem() {}
+        void onSelect();
+        void onClick();
+        void nextItem();
+        void prevItem();
+        void mouseMove(int x, int y);
 
-        const char* getName(){ return OSKName; }
+        const char *getName() { return OSKName; }
 
         void setOSKDev(DeviceHandler *osk)
         {
             // This layer will only accept OSK devices
-            if (!strcmp(OSKName, osk->getSubClassName(0))){
+            if (!strcmp(OSKName, osk->getSubClassName(0)))
+            {
                 _oskDev = dynamic_cast<OSKeyboard *>(osk);
             }
         }

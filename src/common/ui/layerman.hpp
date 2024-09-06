@@ -76,9 +76,12 @@ namespace layers
 		virtual void resize(int vRes, int hRes) {}
 		virtual void draw(gpu::Context *ctx, gpu::Font *font, gpu::Color *color, uint32_t time) const {}
 		virtual void update(uint32_t time) {}
+		virtual void onSelect(){}
 		virtual void onClick(int clickCode) {}
 		virtual void onScroll(int clickCode) {}
 		virtual void onKey(int clickCode) {}
+		virtual void mouseMove(int x, int y) {}
+		virtual void prevItem(){}
 		virtual void nextItem(){}
 	};
 
@@ -150,6 +153,7 @@ namespace layers
 			default:
 				break;
 			}
+			layer->resize(gpu->getHorizontalRes(), gpu->getVerticalRes());
 			_uxLayers.insert(_uxLayers.begin() + idx, std::move(layer));
 		};
 	};
