@@ -46,8 +46,9 @@ if(WIN32)
 		src/common/util/tween.cpp
 		src/common/ui/layerman.cpp
 		src/common/ui/layers/bg.cpp
-		src/common/ui/layers/vkey.cpp
+		src/common/ui/layers/osk.cpp
 		src/common/ui/layers/vmouse.cpp
+		src/common/ui/layers/toast.cpp
 		src/common/args.cpp
 		src/common/io/vinput.cpp
 		src/common/io/vkey.cpp

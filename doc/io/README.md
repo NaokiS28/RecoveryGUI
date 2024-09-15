@@ -2,42 +2,66 @@
 
 BemaniUX is designed to be modular and adaptable to most systems where a screen, input and half decent CPU are present. Part of this includes a modular I/O framework designed to allow the same app to work across multiple devices by simply changing the hardware definition. To support this goal, the application is expected to read I/O using the vInput and vOutput classes primarially, with vJoy, vMouse, vLight and vKeyboard being in place to support their namesakes.
 
+## Contents
+- [IO System Overview](#io-system-overview)
+  - [Contents](#contents)
+  - [vInput](#vinput)
+      - [Reading inputs](#reading-inputs)
+      - [Input structs](#input-structs)
+      - [Button Mappings](#button-mappings)
+      - [Default Mappings](#default-mappings)
+    - [DeviceHandler](#devicehandler)
+    - [Subsystem Overview](#subsystem-overview)
+      - [vJoy](#vjoy)
+      - [vKeyboard](#vkeyboard)
+      - [vMouse](#vmouse)
+      - [vLightgun](#vlightgun)
+  - [vOutput](#voutput)
+
 ## vInput
 All input/output devices that are supported by BemaniUX are grouped into four main device classes. These are:
-* Joystick (vJoy)
-* Keyboard (vKey)
-* Mouse (vMouse)
-* Lightgun (vLight)
+* Joystick [(vJoy)](#vjoy)
+* Keyboard [(vKeyboard)](#k)
+* Mouse [(vMouse)](#vmouse)
+* Lightgun [(vLightgun)](#vlightgun)
 
 vInput is the main input handler sub system which co-ordinates the classes and serves as the API for the main application.
 
-Each device in these classes is given an index number on a first-come-first-served basis. In the context of the program, whatever joystick device happens to be init'd first will be the first in the `Joystick` class, for example. In another example, if your hardware had a JAMMA input and the device handler for JAMMA is loaded first, it will be assumed that it is loaded into the first device index.
+Each device in these classes is given an index number on a first-come-first-served basis. In the context of the program, whatever joystick device happens to be init'd first will be the first in the `Joystick` class, for example. In another example, if the device that is running the procgram had a JAMMA input and the device handler for the JAMMA port is loaded first, it will be loaded into the first device index.
 
-It should be noted, however, that because this order might change even between compiles, you shouldn't program the application to expect a single device to always assume this position, instead you should read the device's name/sub-class to determine the device type.
+It should be noted, however, that because this order might change, perhaps even between compiles, the application should not expect a single device to always assume the same position, instead you should read the device's name/sub-class to determine the device type.
 
 Whilst it's expected you will use the virtual inputs provided to receive a standardised input layout, if you wanted a specific device to read, based on a device ID, sub-class or similar, then you would call `JoyAbs(hash, 5)`, which would only return button 5 of that specific device, if it exists on the system. otherwise requesting `Joystick(1, 5)` would use the first device in the Joystick class and return button 5, whatever device the 1st joystick is.
 
 In contrast, reading from a player's inputs, `GetPlayer(playerNumber)` will return a preformatted array of input data which inturn has come from the device/devices specified in the mapping file.
 
 **Code mapping:**
-* Bits 0-7    = Input Index (255 inputs max)
-* Bits 8-9    = Input Type (Digital, Analogue, Rotary, Keypad)
-* Bits 12-15  = Return type (Digital, Analogue, Keycode)
-* Bits 16-23  = Device ID (within sub-category)
-* Bits 24-27  = Device type sub-category (e.g. JOYSTICK class, sub-class 2, devID 1)
-* Bits 28-31  = Device type category
+| Bits | Mapping |
+|-|-|
+| 0-7 | Input Index (255 inputs max) |
+| 8-9 | Input Type (Digital, Analogue, Rotary, Keypad) |
+| 12-15 | Return type (Digital, Analogue, Keycode) |
+| 16-23 | Device ID (within sub-category) |
+| 24-27 | Device type sub-category (e.g. JOYSTICK class, sub-class 2, devID 1) |
+| 28-31 | Device type category |
+
 
 #### Reading inputs
 vInput can be polled as with a traditional input system, however for efficiency, you can use `getMessages()` to retrieve any updates that need to be processed. This means the application only needs to handle input when it actually has changed, i.e. when a controller has been removed.
 
 The following messages exist:
-* `IM_NONE` - No updates to process.
-* `IM_INPUT` - An input updated state, read the returned `uint32_t code` to see which virtual input changed†.
-* `IM_DEVICE_DISCONNECT` - A controller that was in use has been removed. Read the `uint32_t code` to see which device was removed.
-* `IM_DEVICE_CONNECT` - A new controller has been detected and is ready for use.
-* `IM_DEVICE_ERROR` - A controller in use has had multiple read errors. Read the `uint32_t code` to see which device was affected.
+| IM_Message | Description |
+|-|-|
+|`IM_NONE`| No updates to process.|
+| `IM_INPUT` | An input updated state, read the returned `uint32_t code` to see which virtual input changed*.|
+| `IM_INPUT_SWITCH` | An boolean switch updated state, read the returned `uint32_t code` to see which virtual input changed*.|
+| `IM_INPUT_ANALOG` | An analog value updated state, read the returned `uint32_t code` to see which virtual input changed*.|
+| `IM_INPUT_ROTARY` | A rotary value updated state, read the returned `uint32_t code` to see which virtual input changed*.|
+| `IM_DEVICE_DISCONNECT` | A controller that was in use has been removed. Read the `uint32_t code` to see which device was removed.|
+| `IM_DEVICE_CONNECT` | A new controller has been detected and is ready for use.
+| `IM_DEVICE_ERROR` | A controller in use has had multiple read errors. Read the `uint32_t code` to see which device was affected.|
 
-**†** - `IM_INPUT` is only added to the message buffer once between input reads as to not overrun the app with updates. 
+**\*** - `IM_INPUT` is only added to the message buffer once between input reads as to not overrun the app with updates. 
 
 #### Input structs
 When reading from the vInput system, the following structs will be used to convey input data.
@@ -140,7 +164,7 @@ Further to these, the specific device classes have further functions that need t
 Below is a quick summary of the members that run alongside vInput.
 
 #### vJoy
-vJoy is the overall joystick handler for the vInput system. It reads from all of the connected and present joystick devices and will track their current state. Any changes will cause a `IM_INPUT` message to be sent to the vInput system. vJoy is not supposed to be directly interfaced with, use vInput for interaction or reading of input devices.
+vJoy is the overall joystick handler for the vInput system, acting as a collation of all of the connected joystick devices and will track their current state. Any changes will cause a `IM_INPUT` message to be sent to the vInput system. vJoy is not supposed to be directly interfaced with, use vInput for interaction or reading of input devices.
 
 #### vKeyboard
 vKeyboard is the overall keyboard manager for the vInput system, as well as serving as a virtual on-screen keyboard for systems that lack a physical keyboard. When using standard BemaniUX functions, vKeyboard will automatically appear on it's own layer when required. There shouldn't be a need to directly interface with vKeyboard.

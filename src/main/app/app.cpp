@@ -187,20 +187,26 @@ void App::run(const char *resourceFile)
 		uibg::ScrollDirections::DownRight 
 		);*/
 	
-	_ctx.layerMan.newLayer<vKeyboard::vKeyboard>( 
+	_ctx.layerMan.newLayer<OSKeyboard::OSKeyLayer>( 
 		0, 0,
 		_ctx.gpuCtx.getHorizontalRes(),
 		_ctx.gpuCtx.getVerticalRes()
 		);
 	
-	vKeyboard::vKeyboard* oskptr = dynamic_cast<vKeyboard::vKeyboard*>(
-		_ctx.layerMan.getPtrToLayer(vKeyboard::OSKName));
+	OSKeyboard::OSKeyLayer* oskptr = dynamic_cast<OSKeyboard::OSKeyLayer*>(
+		_ctx.layerMan.getPtrToLayer(OSKeyboard::OSKName));
 	Device::KeyboardHandler* oskdevptr = dynamic_cast<Device::KeyboardHandler*>(
-		_ctx._ioCtx.getKeyDevPtr(vKeyboard::OSKName));
+		_ctx._ioCtx.getKeyDevPtr(OSKeyboard::OSKName));
 	if(oskptr != nullptr && oskdevptr != nullptr){
 		oskptr->setOSKDev(oskdevptr);
 	}
 
+	_ctx.layerMan.newLayer<toast::ToastBar>( 
+		_ctx.infoBar, 0, 0,
+		_ctx.gpuCtx.getHorizontalRes(),
+		_ctx.gpuCtx.getVerticalRes()
+		);
+	
 	_fileIO.loadResourceFile(resourceFile);
 	_loadResources();
 

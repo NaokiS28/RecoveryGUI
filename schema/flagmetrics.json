@@ -1,0 +1,69 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id":     "schema/flagmetrics.json",
+
+	"title": "Root",
+	"type":  "object",
+
+	"required": [
+		"flagWidth",
+		"flagHeight",
+		"baselineOffset",
+		"flagMetrics"
+	],
+
+	"properties":  {
+		"flagWidth": {
+			"title":       "Flag width",
+			"description": "Width of the flags.",
+			"type":        "integer"
+		},
+		"flagHeight": {
+			"title":       "Flag height",
+			"description": "Height of the flags.",
+			"type":        "integer"
+		},
+		"baselineOffset": {
+			"title":       "Baseline offset",
+			"description": "Offset to add to the Y coordinate of each line. Can be negative.",
+			"type":        "integer"
+		},
+
+		"flagMetrics": {
+			"title":       "Flag list",
+			"description": "List of all flags in the texture. Each entry's key must be a two-character string containing a Unicode flag icon.",
+			"type":        "object",
+
+			"additionalProperties": false,
+
+			"patternProperties": {
+				"^[^\\u0000-\\u001f]{2}$": {
+					"title": "Flag metrics",
+					"type":  "object",
+
+					"required":             [ "x", "y" ],
+					"additionalProperties": false,
+
+					"properties": {
+						"x": {
+							"title":       "X offset",
+							"description": "X coordinate of the glyph's top left corner within the texture.",
+							"type":        "integer",
+
+							"minimum":   0,
+							"maximum": 255
+						},
+						"y": {
+							"title":       "Y offset",
+							"description": "Y coordinate of the glyph's top left corner within the texture.",
+							"type":        "integer",
+
+							"minimum":   0,
+							"maximum": 255
+						}
+					}
+				}
+			}
+		}
+	}
+}

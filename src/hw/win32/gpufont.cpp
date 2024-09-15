@@ -14,7 +14,6 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "gpufont.hpp"
 
 namespace gpu
@@ -22,24 +21,26 @@ namespace gpu
 
 	/* Font metrics class */
 
-	CharacterSize FontMetrics::get(util::UTF8CodePoint id) const
+	CharacterSize FontMetrics::get(util::UTF8CodePoint id1, util::UTF8CodePoint id2) const
 	{
 		if (!ptr)
 			return 0;
 
 		auto table = reinterpret_cast<const FontMetricsEntry *>(getHeader() + 1);
-		auto index = id % METRICS_BUCKET_COUNT;
+		auto index = id1 % METRICS_BUCKET_COUNT;
 
+		// If not a multi-code-point sequence, fall back to matching just the first code point
+		index = id1 % METRICS_BUCKET_COUNT;
 		do
 		{
 			auto entry = &table[index];
 			index = entry->getChained();
 
-			if (entry->getCodePoint() == id)
+			if (entry->getCodePoint() == id1)
 				return entry->size;
 		} while (index);
 
-		return (id == FONT_INVALID_CHAR) ? 0 : get(FONT_INVALID_CHAR);
+		return (id1 == FONT_INVALID_CHAR) ? 0 : get(FONT_INVALID_CHAR);
 	}
 
 	/* Font class */
@@ -69,6 +70,10 @@ namespace gpu
 			auto ch = util::parseUTF8Character(str);
 			bool wrap = wordWrap;
 			str += ch.length;
+
+			if(util::isRegionCharacter(ch.codePoint)){
+				
+			}
 
 			switch (ch.codePoint)
 			{
@@ -135,13 +140,13 @@ namespace gpu
 	}
 
 	void Font::draw(
-		 Context &ctx, const char *str, const Rect &rect, Color color, bool wordWrap) const
+		Context &ctx, const char *str, const Rect &rect, Color color, bool wordWrap) const
 	{
 		draw(ctx, str, rect, rect, color, wordWrap);
 	}
 
 	void Font::draw(
-		 Context &ctx, const char *str, const RectWH &rect, Color color,
+		Context &ctx, const char *str, const RectWH &rect, Color color,
 		bool wordWrap) const
 	{
 		Rect _rect{

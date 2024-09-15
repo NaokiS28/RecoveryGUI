@@ -22,8 +22,10 @@ namespace post
 {
     struct InputMsgStruct
     {
-        int message;
-        uint32_t devCode;
+        uint32_t classCode;
+        uint32_t classIdx;
+        uint32_t message;
+        uint32_t param;
     };
 
     class PostBox
@@ -34,10 +36,10 @@ namespace post
 
     public:
         // Post a message to the queue
-        void postMessage(int messageCode, uint32_t deviceCode)
+        void postMessage(uint32_t classCode, uint32_t classIdx, uint32_t messageCode, uint32_t param)
         {
             std::lock_guard<std::mutex> lock(_mutex);
-            _msgList.push(InputMsgStruct{messageCode, deviceCode});
+            _msgList.push(InputMsgStruct{classCode, classIdx, messageCode, param});
         }
 
         // Get a message from the queue

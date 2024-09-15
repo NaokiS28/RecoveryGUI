@@ -31,6 +31,31 @@ namespace vMouse
     {
     }
 
+    void Context::update(){
+        for (auto &dev : _devices)
+        {
+            dev->update();
+        }
+    }
+
+    int Context::init(){
+        int result = 0;
+        for (auto &dev : _devices)
+        {
+            result += dev->init();
+        }
+        return result;
+    }
+
+    int Context::reload(){
+        int result = 0;
+        for (auto &dev : _devices)
+        {
+            result += dev->reload();
+        }
+        return result;
+    }
+
     void Context::_checkPhysicalPresent()
     {
         bool physicalDevice = false;

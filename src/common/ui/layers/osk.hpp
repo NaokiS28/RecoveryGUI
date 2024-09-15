@@ -19,6 +19,7 @@
     [ ] - Interface with IO vKey
     [ ] - Code is a bit messy. Cleaning up would be nice
     [ ] - Asian language support
+    [ ] - Connect up modifier keys
     [ ] - Cyrillic support
 */
 
@@ -38,32 +39,32 @@
 
 using namespace Device;
 
-namespace vKeyboard
+namespace OSKeyboard
 {
     constexpr const char *const OSKName = "vKey OSK";
 }
 
-class OSKeyboard : public KeyboardHandler
+class OSKeyDev : public KeyboardHandler
 {
 public:
-    OSKeyboard()
+    OSKeyDev()
     {
         _deviceClasses[0] = DeviceClass::KeyboardClass;
     }
 
-    int init() { return 0; }
-    void update() {}
-    int reload() { return 0; }
+    int init() override { return 0; }
+    void update() override {}
+    int reload() override { return 0; }
 
     void clearBuffer() {}
-    void type(uint16_t codePoint) {}
+    void type(const char *c) {}
 
-    int getDeviceCount() { return 1; }
-    int getKeyboardType(int idx) { return Keyboard::AlphaNumeric; }
-    const char *getSubClassName(int idx) { return vKeyboard::OSKName; }
+    int getDeviceCount() override { return 1; }
+    int getKeyboardType(int idx) override { return Keyboard::AlphaNumeric; }
+    const char *getDriverName() override { return OSKeyboard::OSKName; }
 };
 
-namespace vKeyboard
+namespace OSKeyboard
 {
     constexpr const int OSKPadding = 10;
     constexpr const int OSKSpacing = 3;
@@ -84,7 +85,7 @@ namespace vKeyboard
         const char *text = nullptr;
     };
 
-    class vKeyboard : public layers::Layer
+    class OSKeyLayer : public layers::Layer
     {
     private:
         bool _enabled = false;
@@ -99,7 +100,7 @@ namespace vKeyboard
         std::vector<KeyMetric> _keyLayout;
         gpu::RectWH _keyboardRect; // BG and total size
 
-        OSKeyboard *_oskDev = nullptr;
+        OSKeyDev *_oskDev = nullptr;
 
         inline bool _keySelected(int r, int c) const
         {
@@ -121,21 +122,22 @@ namespace vKeyboard
         void _setActiveKey(int row, int col);
         void _loadLayout();
         void _drawKey(
-            gpu::Context *ctx, gpu::Font *font,
+            gpu::Context &ctx, gpu::Font &font,
             gpu::Color *color,
-            const KeyMetric *key,
+            const KeyMetric &key,
             bool selected) const;
         void _type();
 
     public:
-        vKeyboard(int x, int y, int w, int h) : Layer(x, y, w, h, layers::LayerType::Overlay, layers::LayerPriority::Top) {}
-        void draw(gpu::Context *ctx, gpu::Font *font, gpu::Color *color, uint32_t time) const;
+        OSKeyLayer(int x, int y, int w, int h) : Layer(x, y, w, h, layers::LayerType::Overlay, layers::LayerPriority::Top) {}
+        void draw(gpu::Context &ctx, gpu::Font &font, gpu::Color *color, uint32_t time) const;
         void resize(int hRes, int vRes)
         {
             _calcKeyboardRect();
             x = (hRes / 2) - (_keyboardRect.w / 2);
             y = ((vRes - OSKPadding) - _keyboardRect.h);
         }
+        
         void update(uint32_t time);
         void show();
         void hide();
@@ -150,12 +152,12 @@ namespace vKeyboard
         void setOSKDev(DeviceHandler *osk)
         {
             // This layer will only accept OSK devices
-            if (!strcmp(OSKName, osk->getSubClassName(0)))
+            if (!strcmp(OSKName, osk->getDriverName()))
             {
-                _oskDev = dynamic_cast<OSKeyboard *>(osk);
+                _oskDev = dynamic_cast<OSKeyDev *>(osk);
             }
         }
     };
 }
 
-REGISTER_DEVICE_HANDLER(OSKeyboard)
+REGISTER_DEVICE_HANDLER(OSKeyDev)

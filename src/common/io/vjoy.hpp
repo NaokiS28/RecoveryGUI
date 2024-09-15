@@ -18,6 +18,7 @@
 
 #include <map>
 #include <vector>
+#include <cstring>
 
 #include "postbox.hpp"
 #include "inputdefs.hpp"
@@ -25,7 +26,8 @@
 
 /*
     Virtual Joystick for UI
-
+    =======================
+    
 */
 
 /*
@@ -36,27 +38,58 @@
 
 namespace vJoy
 {
+    using namespace Input;
+    
+    typedef struct {
+        uint8_t joyNumber = 0;
+        uint8_t classDevIdx = 0;
+        uint8_t subDevIdx = 0;
+        uint8_t switchCount = 0;
+        uint8_t analogCount = 0;
+        uint8_t relativeCount = 0;
+        Joystick::JoystickState state;
+        //Joystick::JoystickState lastState;
+    } vJoyDev;
 
     class Context {
     private:
         //std::map<int, 
         std::vector<Device::JoystickHandler*> _devices;
+        std::vector<vJoyDev> _joystickDevs;
+        uint8_t _joyDevCount = 0;       // This is deliberately seperate and does not decrement.
+
+        int _getVJoyDevIdx(int classIdx, int devIdx);
+        void _processMessage();
 
     public:
         post::PostBox* _outBox;
         post::PostBox _inBox;
         Context(post::PostBox *outBox) : _outBox(outBox){}
 
-        int init(){ return 0; }
-        int reload(){ return 0; }
+        int init();
+        int reload();
         void update();
 
-        void addJoystick() { _outBox->postMessage(Input::IM_DEVICE_CONNECT, 0); }
-        void addDevice(Device::JoystickHandler *device) { 
-            _devices.push_back(device); 
-            _devices.back()->_outBox = &_inBox;
-        }
+        void addDevice(Device::JoystickHandler *device);
+        int getJoystickCount() { return _joystickDevs.size(); }
+        
+        uint8_t getSwitchCount(uint8_t idx);
+        uint8_t getAnalogCount(uint8_t idx);
+        uint8_t getRelativeCount(uint8_t idx);
+        uint32_t getSwitch(uint8_t idx);
+        int16_t getAnalog(uint8_t idx, uint8_t channel);
+        int16_t getRelative(uint8_t idx, uint8_t channel);
+        const char *getDriverName(uint8_t idx);
+        const char *getJoystickName(uint8_t idx);
 
+        Device::JoystickHandler* getJoyPtr(const char* name) const {
+            for (auto& dev : _devices){
+                if(!strcmp(name, dev->getDriverName())){
+                    return dev;
+                }
+            }
+            return nullptr;
+        }
     };
     
 }

@@ -26,7 +26,7 @@
 #include "main/uibase.hpp"
 #include "modals.hpp"
 
-#include "common/ui/layers/vkey.hpp"
+#include "common/ui/layers/osk.hpp"
 
 /* Filesystem manager class */
 

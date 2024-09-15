@@ -42,7 +42,8 @@ namespace Device
         KeyboardClass,
         MouseClass,
         LightgunClass,
-        Class_Max = LightgunClass
+        OSClass,
+        Class_Max = OSClass
     };
 
     constexpr const char* const DeviceClassNames[] = {
@@ -50,21 +51,36 @@ namespace Device
         "Joystick",
         "Keyboard",
         "Mouse",
-        "Lightgun"        
+        "Lightgun",
+        "OS"
     };
 
     class DeviceHandler
     {
     protected:
         std::array<int, DeviceClass::Class_Max> _deviceClasses;
-    public:
-        post::PostBox* _outBox;
+        bool _polledMode = false;
+
+        void setPolledMode(bool state){ _polledMode = state; }
+
+        void postMessage(uint32_t classCode, uint32_t classIdx, uint32_t messageCode, uint32_t param){
+            if(_outBox != nullptr){
+                _outBox->postMessage(classCode, classIdx, messageCode, param);
+            }
+        }
         
+    public:
+        int _classCode = 0;     // Do not modify
+        int _classIdx = 0;      // Do not modify
+        post::PostBox* _outBox = nullptr;   // Do not modify
+
         DeviceHandler() :
             _deviceClasses{} {
             _deviceClasses.fill(DeviceClass::NullClass);
         }   
         virtual ~DeviceHandler() = default;
+
+        bool isPollable(){ return _polledMode; }
         
         int getClassType(int idx) {
             if (idx < 0 || (size_t)idx >= _deviceClasses.size()) {
@@ -79,7 +95,6 @@ namespace Device
             return nullptr;
         }
 
-        virtual const char *getSubClassName(int idx) { return nullptr; }
         
         virtual int init() { return 0; }    // Override if a handler needs to be init'd after the app has started.
         virtual int reload() = 0;           // Reload is called if the IO system needs to be reset
@@ -87,6 +102,7 @@ namespace Device
 
         virtual int getDeviceCount() = 0;       // Return how many devices this class handler current recognizes
         virtual const char* getDeviceName(int idx) { return nullptr; }
+        virtual const char *getDriverName() = 0;
     };
 
     class JoystickHandler : public virtual DeviceHandler
@@ -94,13 +110,22 @@ namespace Device
     public:
         virtual ~JoystickHandler() = default; // Any expansion classes are constructed during the IO handler construction.
 
+        void postMessage(uint32_t messageCode, uint32_t param){
+            if(_outBox != nullptr){
+                _outBox->postMessage(DeviceClass::JoystickClass, _classIdx, messageCode, param);
+            }
+        }
+
         virtual bool getSwitch(uint32_t code) = 0;  // Get boolean value of switch from input code
-        virtual int getAnalog(uint32_t code) = 0;   // Get analog (int16_t) value of input from input code
-        virtual int getRelative(uint32_t code) = 0; // Get relative (int16_t) value of input from input code
+        virtual uint32_t getDigital(uint32_t code) = 0; // Get all 32 digital states
+        virtual int16_t getAnalog(uint32_t code) = 0;   // Get analog (int16_t) value of input from input code
+        virtual int16_t getRelative(uint32_t code) = 0; // Get relative (int16_t) value of input from input code
 
         virtual int getSwitchCount(uint32_t code) { return 0; }
         virtual int getAnalogCount(uint32_t code) { return 0; }
         virtual int getRelativeCount(uint32_t code) { return 0; }
+
+        virtual const char *getDriverName() { return "Joystick"; }
     };
 
     class MouseHandler : public virtual DeviceHandler
@@ -108,7 +133,15 @@ namespace Device
     public:
         virtual ~MouseHandler() = default; // Any expansion classes are constructed during the IO handler construction.
 
+        void postMessage(uint32_t messageCode, uint32_t param){
+            if(_outBox != nullptr){
+                _outBox->postMessage(DeviceClass::MouseClass, _classIdx, messageCode, param);
+            }
+        }
+
         virtual int getMouseType(int idx) = 0;
+
+        virtual const char *getDriverName() { return "Mouse"; }
     };
 
     class LightgunHandler : public virtual DeviceHandler
@@ -116,7 +149,15 @@ namespace Device
     public:
         virtual ~LightgunHandler() = default; // Any expansion classes are constructed during the IO handler construction.
 
-        //virtual int getGunType(int idx) = 0;
+        void postMessage(uint32_t messageCode, uint32_t param){
+            if(_outBox != nullptr){
+                _outBox->postMessage(DeviceClass::LightgunClass, _classIdx, messageCode, param);
+            }
+        }
+
+        virtual int getLightgunType(int idx) = 0;
+
+        virtual const char *getDriverName() override { return "Lightgun"; }
     };
 
     class KeyboardHandler : public virtual DeviceHandler
@@ -124,7 +165,33 @@ namespace Device
     public:
         virtual ~KeyboardHandler() = default; // Any expansion classes are constructed during the IO handler construction.
 
+        void postMessage(uint32_t messageCode, uint32_t param){
+            if(_outBox != nullptr){
+                _outBox->postMessage(DeviceClass::KeyboardClass, _classIdx, messageCode, param);
+            }
+        }
+
         virtual int getKeyboardType(int idx) = 0;
+        virtual void type(const char *c) = 0;
+
+        virtual const char *getDriverName() { return "Keyboard"; }
+    };
+
+    /*
+        OS Handler is for any un-accounted for inputs/systems that
+        has need to be handled, such as Windows API messages.
+    */ 
+
+    class OSHandler : public virtual DeviceHandler
+    {
+    public:
+        virtual ~OSHandler() = default; // Any expansion classes are constructed during the IO handler construction.
+
+        void postMessage(int devIdx, int messageCode){
+            if(_outBox != nullptr){
+                _outBox->postMessage(DeviceClass::KeyboardClass, _classIdx, devIdx, messageCode);
+            }
+        }
     };
 
     class NullHandler : public JoystickHandler, public KeyboardHandler, public MouseHandler {
@@ -139,8 +206,10 @@ namespace Device
         int getMouseType(int idx) { return 0; }
         int getKeyboardType(int idx) { return 0; }
         bool getSwitch(uint32_t code) { return 0; }
-        int getAnalog(uint32_t code) { return 0; }
-        int getRelative(uint32_t code) { return 0; }
+        int16_t getAnalog(uint32_t code) { return 0; }
+        int16_t getRelative(uint32_t code) { return 0; }
+
+        const char *getDriverName() override { return "null"; }
     };
 }
 

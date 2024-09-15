@@ -51,6 +51,7 @@ public:
     }
     uint32_t getInputs() { return state.dwButtons; }
     int id = 0;
+    JOYINFOEX lastState;
     JOYINFOEX state;
     JOYCAPS device;
     //DeviceMeta meta;
@@ -59,9 +60,9 @@ public:
 class Win32Joy : public JoystickHandler
 {
 private:
-    bool polledMode = true; // Joysticks can use messaging or polling.
     std::vector<JoystickDevice> joystickList;
     void _newJoystick(JoystickDevice &joy);
+    void _removeJoystick(JoystickDevice &joy);
     void _reset();
 
 public:
@@ -73,11 +74,13 @@ public:
     int reload() override;
 
     const char *getDeviceName(int idx);
+    const char *getDriverName() override { return "Joystick"; }
     int getDeviceCount() override { return joystickList.size(); }
 
     bool getSwitch(uint32_t code) override;
-    int getAnalog(uint32_t code) override;
-    int getRelative(uint32_t code) override { return 0; }
+    int16_t getAnalog(uint32_t code) override;
+    int16_t getRelative(uint32_t code) override { return 0; }
+    uint32_t getDigital(uint32_t code) override;
 
     int getSwitchCount(uint32_t code) override { return joystickList[Input::getInputDevId(code)].device.wNumButtons; }
     int getAnalogCount(uint32_t code) override { return joystickList[Input::getInputDevId(code)].device.wNumAxes; }

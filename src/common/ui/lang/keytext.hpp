@@ -19,6 +19,7 @@
 /*
     Todo:
     [ ] - Add support for more keyboard locales
+    [ ] - Convert into a loaded file
 */
 
 namespace locale

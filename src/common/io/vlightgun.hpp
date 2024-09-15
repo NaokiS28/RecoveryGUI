@@ -64,9 +64,9 @@ namespace vLightgun
 
         Context(post::PostBox *outBox);
 
-        int init(){ return 0; }
-        int reload(){ return 0; }
-        void update(){}
+        int init();
+        int reload();
+        void update();
 
         void addLightgun();
         void removeLightgun();

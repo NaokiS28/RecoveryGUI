@@ -14,4 +14,7 @@ The following issues are known about and will be marked as fixed with check box.
 - [ ] GUI Scaling is entirely broken. It will scale primatives but not images or text properly.
 - [ ] Input system is non-existant really
 - [ ] Virtual/Mouse is non-existant.
-- [ ] Virtual keyboard is non-existant.
+- [x] ~~Virtual keyboard is non-existant~~. Mostly implemented now.
+- [ ] Regional flags need to be implemented.
+- [ ] Locales should be a loaded file
+- [ ] Code makes heavy use of vectors, way to keep cross-compatible with bare-metal psx?

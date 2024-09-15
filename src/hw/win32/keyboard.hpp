@@ -45,6 +45,8 @@ public:
     void update();
     int reload() { return 0; }
 
+    void type(const char *c){}
+
     int getDeviceCount() { return keyboardCount; }
 
     int getKeyboardType(int idx) { return Keyboard::AlphaNumeric; }

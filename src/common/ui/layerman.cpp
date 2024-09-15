@@ -27,7 +27,7 @@ namespace layers
 
     void LayerManager::render(){
         for(auto& layer : _uxLayers){
-            gpu->setOffset(layer->x, layer->y);
+            gpu.setOffset(layer->x, layer->y);
             layer->draw(gpu, font, color, currentTime);
         }
     }

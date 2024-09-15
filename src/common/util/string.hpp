@@ -19,42 +19,46 @@
 #include <stddef.h>
 #include <stdint.h>
 
-namespace util {
+namespace util
+{
 
-/* String manipulation */
+	/* String manipulation */
 
-extern const char HEX_CHARSET[], BASE41_CHARSET[];
+	extern const char HEX_CHARSET[], BASE41_CHARSET[];
 
-size_t hexValueToString(char *output, uint32_t value, size_t numDigits = 8);
-size_t hexToString(
-	char *output, const uint8_t *input, size_t length, char separator = 0
-);
-size_t serialNumberToString(char *output, const uint8_t *input);
-size_t traceIDToString(char *output, const uint8_t *input);
-size_t encodeBase41(char *output, const uint8_t *input, size_t length);
+	size_t hexValueToString(char *output, uint32_t value, size_t numDigits = 8);
+	size_t hexToString(
+		char *output, const uint8_t *input, size_t length, char separator = 0);
+	size_t serialNumberToString(char *output, const uint8_t *input);
+	size_t traceIDToString(char *output, const uint8_t *input);
+	size_t encodeBase41(char *output, const uint8_t *input, size_t length);
 
-/* UTF-8 parser */
+	/* UTF-8 parser */
 
-using UTF8CodePoint = uint32_t;
+	using UTF8CodePoint = uint32_t;
 
-struct UTF8Character {
-public:
-	UTF8CodePoint codePoint;
-	size_t        length;
-};
+	constexpr char32_t regionCodePointRanges[2] = { 0x1F1E6, 0x1F1FF };
 
-UTF8Character parseUTF8Character(const char *ch);
-size_t getUTF8StringLength(const char *str);
+	struct UTF8Character
+	{
+	public:
+		UTF8CodePoint codePoint;
+		size_t length;
+	};
 
-/* LZ4 decompressor */
+	bool isRegionCharacter(char32_t codePoint);
+	UTF8Character parseUTF8Character(const char *ch);
+	size_t getUTF8StringLength(const char *str);
 
-static inline size_t getLZ4InPlaceMargin(size_t inputLength) {
-	return (inputLength >> 8) + 32;
-}
+	/* LZ4 decompressor */
 
-void decompressLZ4(
-	uint8_t *output, const uint8_t *input, size_t maxOutputLength,
-	size_t inputLength
-);
+	static inline size_t getLZ4InPlaceMargin(size_t inputLength)
+	{
+		return (inputLength >> 8) + 32;
+	}
+
+	void decompressLZ4(
+		uint8_t *output, const uint8_t *input, size_t maxOutputLength,
+		size_t inputLength);
 
 }

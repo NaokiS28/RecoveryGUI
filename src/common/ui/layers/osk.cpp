@@ -14,9 +14,9 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vkey.hpp"
+#include "osk.hpp"
 
-namespace vKeyboard
+namespace OSKeyboard
 {
     int _utfLength(unsigned char c)
     {
@@ -113,7 +113,7 @@ namespace vKeyboard
         }
     }
 
-    int vKeyboard::_getKeyIdx(int row, int col)
+    int OSKeyLayer::_getKeyIdx(int row, int col)
     {
         if (row > _inputLocale.keyLayout.rows || col > _inputLocale.keyLayout.cols)
         {
@@ -145,25 +145,25 @@ namespace vKeyboard
         return 0;
     }
 
-    void vKeyboard::_drawKey(
-        gpu::Context *ctx, gpu::Font *font,
+    void OSKeyLayer::_drawKey(
+        gpu::Context &ctx, gpu::Font &font,
         gpu::Color *color,
-        const KeyMetric *key,
+        const KeyMetric &key,
         bool selected) const
     {
-        int16_t kTextW = (int16_t)font->getStringWidth(key->text);
-        int16_t kTextH = (int16_t)font->getLineHeight();
+        int16_t kTextW = (int16_t)font.getStringWidth(key.text);
+        int16_t kTextH = (int16_t)font.getLineHeight();
         gpu::RectWH rect{
-            (int16_t)key->x,
-            (int16_t)key->y,
-            (int16_t)key->w,
-            (int16_t)key->h};
+            (int16_t)key.x,
+            (int16_t)key.y,
+            (int16_t)key.w,
+            (int16_t)key.h};
 
-        ctx->drawRect(rect, gpu::rgb(0, 0, 0));
+        ctx.drawRect(rect, gpu::rgb(0, 0, 0));
 
         if (selected)
         {
-            ctx->drawGradientRectVVar(
+            ctx.drawGradientRectVVar(
                 rect,
                 gpu::rgba(0, 0, 0, 0),
                 color[3],
@@ -171,15 +171,15 @@ namespace vKeyboard
                 units::percentOf(100, 0, rect.w));
         };
 
-        if (key->text != nullptr)
+        if (key.text != nullptr)
         {
             rect.x += (rect.w / 2) - (kTextW / 2) + 1;
             rect.y += (rect.h / 2) - (kTextH / 2) + 1;
-            font->draw(*ctx, key->text, rect);
+            font.draw(ctx, key.text, rect);
         }
     }
 
-    void vKeyboard::_setActiveKey(int row, int col)
+    void OSKeyLayer::_setActiveKey(int row, int col)
     {
         /*
         if(row > 0 && col > 0){
@@ -190,13 +190,13 @@ namespace vKeyboard
         _selKeyRow = row;
     }
 
-    void vKeyboard::draw(gpu::Context *ctx, gpu::Font *font, gpu::Color *color, uint32_t time) const
+    void OSKeyLayer::draw(gpu::Context &ctx, gpu::Font &font, gpu::Color *color, uint32_t time) const
     {
         if (_animationState != Hidden && _oskDev != nullptr)
         {
             // Backdrop
-            ctx->setOffset(x, y);
-            ctx->drawRect(
+            ctx.setOffset(x, y);
+            ctx.drawRect(
                 _keyboardRect.x,
                 _keyboardRect.y,
                 _keyboardRect.w,
@@ -224,13 +224,13 @@ namespace vKeyboard
                 {
                     _drawKey(
                         ctx, font, color,
-                        &key, kSelect);
+                        key, kSelect);
                 }
             }
         }
     }
 
-    void vKeyboard::_loadLayout()
+    void OSKeyLayer::_loadLayout()
     {
         if (_inputLocale.keyLayout.keyLayout.capacity() == 0)
         {
@@ -373,7 +373,7 @@ namespace vKeyboard
         mouseMove(200, 170);
     }
 
-    void vKeyboard::mouseMove(int x, int y)
+    void OSKeyLayer::mouseMove(int x, int y)
     {
         // mouseMove is only called when the cursor moves over the layer
         // so x & y will only be as low or high as the extents of the w & h values.
@@ -418,7 +418,7 @@ namespace vKeyboard
         }
     }
 
-    void vKeyboard::prevItem()
+    void OSKeyLayer::prevItem()
     {
         if (_selKeyCol - 1 >= 0)
             _setActiveKey(_selKeyRow, _selKeyCol - 1);
@@ -431,7 +431,7 @@ namespace vKeyboard
         }
     }
 
-    void vKeyboard::nextItem()
+    void OSKeyLayer::nextItem()
     {
         if (_selKeyCol + 1 <= _inputLocale.keyLayout.cols)
             _setActiveKey(_selKeyRow, _selKeyCol + 1);
@@ -444,7 +444,7 @@ namespace vKeyboard
         }
     }
 
-    void vKeyboard::update(uint32_t time)
+    void OSKeyLayer::update(uint32_t time)
     {
         if (!_popupAnim.isDone(time))
         {
@@ -465,25 +465,26 @@ namespace vKeyboard
         }
     }
 
-    void vKeyboard::_type()
+    void OSKeyLayer::_type()
     {
         if (_selKeyCol > 0 && _selKeyRow > 0)
         {
             // Todo
+            _oskDev->type(0);
         }
     }
 
-    void vKeyboard::onSelect()
+    void OSKeyLayer::onSelect()
     {
         _type();
     }
 
-    void vKeyboard::onClick()
+    void OSKeyLayer::onClick()
     {
         _type();
     }
 
-    void vKeyboard::show()
+    void OSKeyLayer::show()
     {
         if (_oskDev != nullptr && !_enabled)
         {
@@ -494,7 +495,7 @@ namespace vKeyboard
         }
     }
 
-    void vKeyboard::hide()
+    void OSKeyLayer::hide()
     {
         if (_oskDev != nullptr && _enabled)
         {

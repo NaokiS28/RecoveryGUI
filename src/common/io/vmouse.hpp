@@ -72,12 +72,19 @@ namespace vMouse
         void draw(gpu::Context &ctx);
     };
 
+    typedef struct{
+        uint8_t mouseId;
+        uint8_t classDevIdx = 0;
+        uint8_t subDevIdx = 0;
+        Cursor cursor;
+    } MouseDev;
+
     class Context
     {
     private:
         bool _physicalPresent = false;
-        std::vector<std::unique_ptr<Cursor>> _cursorList;
         std::vector<Device::MouseHandler*> _devices;
+        std::vector<MouseDev> _mouseDevs;
         
         void _checkPhysicalPresent();
 
@@ -87,15 +94,26 @@ namespace vMouse
 
         Context(post::PostBox *outBox);
 
-        int init(){ return 0; }
-        int reload(){ return 0; }
-        void update(){}
+        int init();
+        int reload();
+        void update();
 
         void addMouse();
         void removeMouse();
         void addDevice(Device::MouseHandler *device) { 
             _devices.push_back(device);
             _devices.back()->_outBox = &_inBox;
+        }
+
+        int getMouseCount() { return _mouseDevs.size(); }
+
+        Device::MouseHandler* getMousePtr(const char* name) const {
+            for (auto& dev : _devices){
+                if(!strcmp(name, dev->getDriverName())){
+                    return dev;
+                }
+            }
+            return nullptr;
         }
     };
 

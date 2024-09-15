@@ -39,6 +39,12 @@
 
 namespace vKey
 {
+    typedef struct{
+        uint8_t keyboardId;
+        uint8_t classDevIdx = 0;
+        uint8_t subDevIdx = 0;
+    } KeyDev;
+
     class Context {
     private:
         bool _enabled = false;
@@ -46,6 +52,7 @@ namespace vKey
         int _locale = locale::US;
         std::vector<std::map<int, char>> _charBuffer;       // <Keyboard Number, character>
         std::vector<Device::KeyboardHandler*> _devices;
+        std::vector<KeyDev> _keyboardDevs;
 
         void _checkPhysicalPresent();
 
@@ -56,8 +63,8 @@ namespace vKey
         Context(post::PostBox *outBox);
 
         int init();
-        int reload(){ return 0; }
-        void update(){}
+        int reload();
+        void update();
 
         void setLocale(locale::LocaleIndex locale) { _locale = locale; }
         void show() { _enabled = (!_physicalPresent && true); }
@@ -68,10 +75,12 @@ namespace vKey
             _devices.push_back(device); 
             _devices.back()->_outBox = &_inBox;
         }
+        
+        int getKeyboardCount() { return _keyboardDevs.size(); }
 
-        Device::KeyboardHandler* getKeyboardPtr(const char* name){
+        Device::KeyboardHandler* getKeyboardPtr(const char* name) const {
             for (auto& dev : _devices){
-                if(!strcmp(name, dev->getSubClassName(0))){
+                if(!strcmp(name, dev->getDriverName())){
                     return dev;
                 }
             }

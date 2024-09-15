@@ -18,13 +18,18 @@
 
 #include <stdint.h>
 #include <vector>
-#include "common/ui/layers/vkey.hpp"
+
+#include "common/ui/layers/osk.hpp"
 #include "common/ui/layerman.hpp"
+#include "common/ui/notifd.hpp"
+
 #include "common/util/log.hpp"
 #include "common/util/tween.hpp"
 #include "common/util/units.hpp"
+
 #include "common/io/vmouse.hpp"
 #include "common/io/vinput.hpp"
+
 #include "hw/gpu.hpp"
 #include "hw/gpufont.hpp"
 
@@ -167,6 +172,7 @@ namespace ui
 		int _currentScreen;
 
 	public:
+		notif::Context infoBar;
 		gpu::Context &gpuCtx;
 
 		Layer *backgrounds[4], *overlays[4];
@@ -174,7 +180,7 @@ namespace ui
 		gpu::Font font;
 		gpu::Color colors[NUM_UI_COLORS];
 
-		layers::LayerManager layerMan = layers::LayerManager(&gpuCtx, &font, colors);
+		layers::LayerManager layerMan = layers::LayerManager(gpuCtx, font, colors);
 
 		ButtonState buttons;
 		//io::Context &ioCtx;

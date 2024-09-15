@@ -18,7 +18,7 @@
 
 namespace vMouse
 {
-    void vMouse::draw(gpu::Context *ctx, gpu::Font *font, gpu::Color *color, uint32_t time) const {
+    void vMouse::draw(gpu::Context &ctx, gpu::Font &font, gpu::Color *color, uint32_t time) const {
         if(_enabled){
 
         } else {

@@ -17,3 +17,4 @@
 #pragma once
 
 #include "common/ui/layers/bg.hpp"
+#include "common/ui/layers/toast.hpp"

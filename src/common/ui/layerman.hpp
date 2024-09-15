@@ -74,7 +74,7 @@ namespace layers
 
 		virtual const char* getName() = 0;
 		virtual void resize(int vRes, int hRes) {}
-		virtual void draw(gpu::Context *ctx, gpu::Font *font, gpu::Color *color, uint32_t time) const {}
+		virtual void draw(gpu::Context &ctx, gpu::Font &font, gpu::Color *color, uint32_t time) const {}
 		virtual void update(uint32_t time) {}
 		virtual void onSelect(){}
 		virtual void onClick(int clickCode) {}
@@ -88,8 +88,8 @@ namespace layers
 	class LayerManager
 	{
 	private:
-		gpu::Context *gpu = nullptr;
-		gpu::Font *font = nullptr;
+		gpu::Context &gpu;
+		gpu::Font &font;
 		gpu::Color *color = nullptr;
 		uint32_t currentTime = 0;
 		int _backgroundCount = 0;
@@ -100,11 +100,11 @@ namespace layers
 		int _getNewLayerIndex(Layer* layer);
 		inline void _setOffset(int x, int y) const
 		{
-			gpu->setOffset(x, y);
+			gpu.setOffset(x, y);
 		};
 
 	public:
-		LayerManager(gpu::Context *ctx, gpu::Font *font, gpu::Color *color) : gpu(ctx), font(font), color(color){}
+		LayerManager(gpu::Context &ctx, gpu::Font &font, gpu::Color *color) : gpu(ctx), font(font), color(color){}
 		~LayerManager() {}
 
 		int getLayerCount() { return _uxLayers.size(); }
@@ -153,7 +153,7 @@ namespace layers
 			default:
 				break;
 			}
-			layer->resize(gpu->getHorizontalRes(), gpu->getVerticalRes());
+			layer->resize(gpu.getHorizontalRes(), gpu.getVerticalRes());
 			_uxLayers.insert(_uxLayers.begin() + idx, std::move(layer));
 		};
 	};

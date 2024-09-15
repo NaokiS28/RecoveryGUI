@@ -41,7 +41,12 @@ namespace vInput
                 case Device::DeviceClass::LightgunClass:
                     _lightgunClass.addDevice(dynamic_cast<Device::LightgunHandler *>(device));
                     continue;
+                case Device::DeviceClass::OSClass:
+                    continue;
                 case Device::DeviceClass::NullClass:
+                    continue;
+                default:
+                    LOG_APP("Error: Unhandled device class: 0x%x", devClass);
                     break;
                 }
             }
@@ -51,10 +56,6 @@ namespace vInput
     int Context::init()
     {
         int result = 0;
-        for (auto &dev : _devices)
-        {
-            result += dev->init();
-        }
         result += _joyClass.init();
         result += _keyboardClass.init();
         result += _mouseClass.init();
@@ -64,10 +65,6 @@ namespace vInput
 
     void Context::update()
     {
-        for (auto &dev : _devices)
-        {
-            dev->update();
-        }
         _joyClass.update();
         _keyboardClass.update();
         _mouseClass.update();
@@ -81,10 +78,6 @@ namespace vInput
     int Context::reload()
     {
         int result = 0;
-        for (auto &dev : _devices)
-        {
-            result += dev->reload();
-        }
         result += _joyClass.reload();
         result += _keyboardClass.reload();
         result += _mouseClass.reload();
@@ -97,13 +90,15 @@ namespace vInput
         post::InputMsgStruct msg;
         if (_inBox.getMessage(&msg))
         {
-            switch (msg.message)
+            switch (msg.classCode)
             {
-            case Input::IM_DEVICE_CONNECT:
+            case Device::JoystickClass:
                 break;
-            case Input::IM_DEVICE_DISCONNECT:
+            case Device::MouseClass:
                 break;
-            case Input::IM_INPUT:
+            case Device::LightgunClass:
+                break;
+            case Device::KeyboardClass:
                 break;
             default:
                 break;

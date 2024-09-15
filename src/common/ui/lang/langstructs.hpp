@@ -19,6 +19,11 @@
 #include "keylayout.hpp"
 #include "keytext.hpp"
 
+/*
+    Todo:
+    [ ] - Convert into loaded file
+*/
+
 namespace locale
 {
     struct LocaleStruct

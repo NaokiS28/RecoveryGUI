@@ -37,10 +37,32 @@ namespace vKey
         _physicalPresent = physicalDevice;
     }
 
-    int Context::init(){
-        _checkPhysicalPresent();
-        
-        return 0;
+    void Context::update(){
+        for (auto& dev : _devices){
+            dev->update();
+        }
+        if(_inBox.available()){
+            post::InputMsgStruct msg;
+            _inBox.getMessage(&msg);
+        }
     }
 
+    int Context::init(){
+        int result = 0;
+        for (auto &dev : _devices)
+        {
+            result += dev->init();
+        }
+        _checkPhysicalPresent();
+        return result;
+    }
+
+    int Context::reload(){
+        int result = 0;
+        for (auto &dev : _devices)
+        {
+            result += dev->reload();
+        }
+        return result;
+    }
 }

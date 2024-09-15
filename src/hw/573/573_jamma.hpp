@@ -66,20 +66,30 @@ private:
 
 public:
     int init() override { 
-        _outBox->postMessage(Input::IM_DEVICE_CONNECT, 1);
-        _outBox->postMessage(Input::IM_DEVICE_CONNECT, 2);
+        postMessage(Input::IM_DEVICE_CONNECT, 1);
+        postMessage(Input::IM_DEVICE_CONNECT, 2);
         return 0; 
     }
-    void update() override {}
+    void update() override { 
+        // Read JAMMA port
+        if(false){
+            int player = 0; // 0 = P1, 1 = P2
+            postMessage(
+                Input::InputMessage::IM_INPUT_DIGITAL, 
+                Input::getInputCode(player, Input::InputType::Digital, 0));
+        }
+    }
     int reload() override { return 0; }
 
+    const char *getDriverName() override { return "JAMMA"; }
     const char *getDeviceName(int idx) override { return Arcade::CabinetNames[_cabType]; }
     int getDeviceCount() override { return 1; }
 
     // JAMMA
     bool getSwitch(uint32_t code) override {}
-    int getAnalog(uint32_t code) override {}
-    int getRelative(uint32_t code) override { return 0; }
+    uint32_t getDigital(uint32_t code) override {}
+    int16_t getAnalog(uint32_t code) override {}
+    int16_t getRelative(uint32_t code) override { return 0; }
 
     int getSwitchCount(uint32_t code) override { return 0; }
     int getAnalogCount(uint32_t code) override { return 0; }

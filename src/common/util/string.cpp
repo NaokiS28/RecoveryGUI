@@ -20,189 +20,218 @@
 #include <stdio.h>
 #include "common/util/string.hpp"
 
-namespace util {
+namespace util
+{
 
-/* String manipulation */
+	/* String manipulation */
 
-const char HEX_CHARSET[]{ "0123456789ABCDEF" };
-const char BASE41_CHARSET[]{ "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./:" };
+	const char HEX_CHARSET[]{"0123456789ABCDEF"};
+	const char BASE41_CHARSET[]{"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-./:"};
 
-size_t hexValueToString(char *output, uint32_t value, size_t numDigits) {
-	output += numDigits;
-	*output = 0;
+	size_t hexValueToString(char *output, uint32_t value, size_t numDigits)
+	{
+		output += numDigits;
+		*output = 0;
 
-	for (size_t i = numDigits; i; i--, value >>= 4)
-		*(--output) = HEX_CHARSET[value & 0xf];
+		for (size_t i = numDigits; i; i--, value >>= 4)
+			*(--output) = HEX_CHARSET[value & 0xf];
 
-	return numDigits;
-}
+		return numDigits;
+	}
 
-size_t hexToString(
-	char *output, const uint8_t *input, size_t length, char separator
-) {
-	size_t outLength = 0;
+	size_t hexToString(
+		char *output, const uint8_t *input, size_t length, char separator)
+	{
+		size_t outLength = 0;
 
-	for (; length; length--) {
-		uint8_t value = *(input++);
+		for (; length; length--)
+		{
+			uint8_t value = *(input++);
 
-		*(output++) = HEX_CHARSET[value >> 4];
-		*(output++) = HEX_CHARSET[value & 0xf];
+			*(output++) = HEX_CHARSET[value >> 4];
+			*(output++) = HEX_CHARSET[value & 0xf];
 
-		if (separator && (length > 1)) {
-			*(output++) = separator;
-			outLength  += 3;
-		} else {
-			outLength  += 2;
+			if (separator && (length > 1))
+			{
+				*(output++) = separator;
+				outLength += 3;
+			}
+			else
+			{
+				outLength += 2;
+			}
+		}
+
+		*output = 0;
+		return outLength;
+	}
+
+	size_t serialNumberToString(char *output, const uint8_t *input)
+	{
+		uint32_t value =
+			input[0] | (input[1] << 8) | (input[2] << 16) | (input[3] << 24);
+
+		return sprintf(output, "%04d-%04d", (value / 10000) % 10000, value % 10000);
+	}
+
+	// This format is used by Konami's tools to display trace IDs in the TID_81
+	// format.
+	static const char _TRACE_ID_CHECKSUM_CHARSET[]{"0X987654321"};
+
+	size_t traceIDToString(char *output, const uint8_t *input)
+	{
+		uint16_t high = (input[0] << 8) | input[1];
+		uint32_t low =
+			(input[2] << 24) | (input[3] << 16) | (input[4] << 8) | input[5];
+
+		size_t length = sprintf(&output[1], "%02d-%04d", high % 100, low % 10000);
+
+		// The checksum is calculated in a very weird way:
+		//   code     = AB-CDEF
+		//   checksum = (A*7 + B*6 + C*5 + D*4 + E*3 + F*2) % 11
+		int checksum = 0, multiplier = 7;
+
+		for (const char *ptr = &output[1]; *ptr; ptr++)
+		{
+			if (*ptr != '-')
+				checksum += (*ptr - '0') * (multiplier--);
+		}
+
+		output[0] = _TRACE_ID_CHECKSUM_CHARSET[checksum % 11];
+		return length + 1;
+	}
+
+	// This encoding is similar to standard base45, but with some problematic
+	// characters (' ', '$', '%', '*') excluded.
+	size_t encodeBase41(char *output, const uint8_t *input, size_t length)
+	{
+		size_t outLength = 0;
+
+		for (int i = length + 1; i > 0; i -= 2)
+		{
+			int value = *(input++) << 8;
+			value |= *(input++);
+
+			*(output++) = BASE41_CHARSET[value % 41];
+			*(output++) = BASE41_CHARSET[(value / 41) % 41];
+			*(output++) = BASE41_CHARSET[value / 1681];
+			outLength += 3;
+		}
+
+		*output = 0;
+		return outLength;
+	}
+
+	/* UTF-8 parser */
+
+	UTF8Character parseUTF8Character(const char *ch)
+	{
+		uint8_t startByte = *(ch++);
+
+		if (!(startByte >> 7))
+			return {startByte, 1};
+
+		size_t length = std::countl_one(startByte);
+		uint32_t codePoint = startByte & ((1 << (7 - length)) - 1);
+
+		for (int i = length - 1; i > 0; i--)
+		{
+			uint8_t contByte = *(ch++);
+
+			if ((contByte & 0xc0) != 0x80)
+				return {codePoint, 0};
+
+			codePoint <<= 6;
+			codePoint |= contByte & 0x3f;
+		}
+
+		return {codePoint, length};
+	}
+
+	size_t getUTF8StringLength(const char *str)
+	{
+		for (size_t length = 0;; length++)
+		{
+			auto value = parseUTF8Character(str);
+
+			if (!value.length)
+			{ // Invalid character
+				str++;
+				continue;
+			}
+
+			if (!value.codePoint) // Null character
+				return length;
+
+			str += value.length;
 		}
 	}
 
-	*output = 0;
-	return outLength;
-}
-
-size_t serialNumberToString(char *output, const uint8_t *input) {
-	uint32_t value =
-		input[0] | (input[1] << 8) | (input[2] << 16) | (input[3] << 24);
-
-	return sprintf(output, "%04d-%04d", (value / 10000) % 10000, value % 10000);
-}
-
-// This format is used by Konami's tools to display trace IDs in the TID_81
-// format.
-static const char _TRACE_ID_CHECKSUM_CHARSET[]{ "0X987654321" };
-
-size_t traceIDToString(char *output, const uint8_t *input) {
-	uint16_t high = (input[0] << 8) | input[1];
-	uint32_t low  =
-		(input[2] << 24) | (input[3] << 16) | (input[4] << 8) | input[5];
-
-	size_t length = sprintf(&output[1], "%02d-%04d", high % 100, low % 10000);
-
-	// The checksum is calculated in a very weird way:
-	//   code     = AB-CDEF
-	//   checksum = (A*7 + B*6 + C*5 + D*4 + E*3 + F*2) % 11
-	int checksum = 0, multiplier = 7;
-
-	for (const char *ptr = &output[1]; *ptr; ptr++) {
-		if (*ptr != '-')
-			checksum += (*ptr - '0') * (multiplier--);
+	bool isRegionCharacter(char32_t codePoint)
+	{
+		if (codePoint >= regionCodePointRanges[0] &&
+			codePoint <= regionCodePointRanges[1])
+			return true;
+		return false;
 	}
 
-	output[0] = _TRACE_ID_CHECKSUM_CHARSET[checksum % 11];
-	return length + 1;
-}
+	/* LZ4 decompressor */
 
-// This encoding is similar to standard base45, but with some problematic
-// characters (' ', '$', '%', '*') excluded.
-size_t encodeBase41(char *output, const uint8_t *input, size_t length) {
-	size_t outLength = 0;
+	void decompressLZ4(
+		uint8_t *output, const uint8_t *input, size_t maxOutputLength,
+		size_t inputLength)
+	{
+		auto outputEnd = &output[maxOutputLength];
+		auto inputEnd = &input[inputLength];
 
-	for (int i = length + 1; i > 0; i -= 2) {
-		int value = *(input++) << 8;
-		value    |= *(input++);
+		while (input < inputEnd)
+		{
+			uint8_t token = *(input++);
 
-		*(output++) = BASE41_CHARSET[value % 41];
-		*(output++) = BASE41_CHARSET[(value / 41) % 41];
-		*(output++) = BASE41_CHARSET[value / 1681];
-		outLength  += 3;
-	}
+			// Copy literals from the input stream.
+			int literalLength = token >> 4;
 
-	*output = 0;
-	return outLength;
-}
+			if (literalLength == 0xf)
+			{
+				uint8_t addend;
 
-/* UTF-8 parser */
+				do
+				{
+					addend = *(input++);
+					literalLength += addend;
+				} while (addend == 0xff);
+			}
 
-UTF8Character parseUTF8Character(const char *ch) {
-    uint8_t startByte = *(ch++);
+			for (; literalLength && (output < outputEnd); literalLength--)
+				*(output++) = *(input++);
+			if (input >= inputEnd)
+				break;
 
-    if (!(startByte >> 7))
-        return { startByte, 1 };
+			int offset = input[0] | (input[1] << 8);
+			input += 2;
 
-    size_t   length    = std::countl_one(startByte);
-    uint32_t codePoint = startByte & ((1 << (7 - length)) - 1);
+			// Copy from previously decompressed data. Note that this *must* be done
+			// one byte at a time, as the compressor relies on out-of-bounds copies
+			// repeating the last byte.
+			int copyLength = token & 0xf;
 
-    for (int i = length - 1; i > 0; i--) {
-        uint8_t contByte = *(ch++);
+			if (copyLength == 0xf)
+			{
+				uint8_t addend;
 
-        if ((contByte & 0xc0) != 0x80)
-            return { codePoint, 0 };
+				do
+				{
+					addend = *(input++);
+					copyLength += addend;
+				} while (addend == 0xff);
+			}
 
-        codePoint <<= 6;
-        codePoint  |= contByte & 0x3f;
-    }
+			auto copySource = output - offset;
+			copyLength += 4;
 
-    return { codePoint, length };
-}
-
-size_t getUTF8StringLength(const char *str) {
-	for (size_t length = 0;; length++) {
-		auto value = parseUTF8Character(str);
-
-		if (!value.length) { // Invalid character
-			str++;
-			continue;
+			for (; copyLength && (output < outputEnd); copyLength--)
+				*(output++) = *(copySource++);
 		}
-
-		if (!value.codePoint) // Null character
-			return length;
-
-		str += value.length;
 	}
-}
-
-/* LZ4 decompressor */
-
-void decompressLZ4(
-	uint8_t *output, const uint8_t *input, size_t maxOutputLength,
-	size_t inputLength
-) {
-	auto outputEnd = &output[maxOutputLength];
-	auto inputEnd  = &input[inputLength];
-
-	while (input < inputEnd) {
-		uint8_t token = *(input++);
-
-		// Copy literals from the input stream.
-		int literalLength = token >> 4;
-
-		if (literalLength == 0xf) {
-			uint8_t addend;
-
-			do {
-				addend         = *(input++);
-				literalLength += addend;
-			} while (addend == 0xff);
-		}
-
-		for (; literalLength && (output < outputEnd); literalLength--)
-			*(output++) = *(input++);
-		if (input >= inputEnd)
-			break;
-
-		int offset = input[0] | (input[1] << 8);
-		input     += 2;
-
-		// Copy from previously decompressed data. Note that this *must* be done
-		// one byte at a time, as the compressor relies on out-of-bounds copies
-		// repeating the last byte.
-		int copyLength = token & 0xf;
-
-		if (copyLength == 0xf) {
-			uint8_t addend;
-
-			do {
-				addend      = *(input++);
-				copyLength += addend;
-			} while (addend == 0xff);
-		}
-
-		auto copySource = output - offset;
-		copyLength     += 4;
-
-		for (; copyLength && (output < outputEnd); copyLength--)
-			*(output++) = *(copySource++);
-	}
-}
 
 }

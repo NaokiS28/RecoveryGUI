@@ -339,6 +339,16 @@
 		"🔌": { "x": 244, "y": 30, "width": 10, "height": 10, "icon": true },
 		"📁": { "x": 224, "y": 40, "width": 10, "height": 10, "icon": true },
 		"📂": { "x": 234, "y": 40, "width": 10, "height": 10, "icon": true },
-		"📄": { "x": 244, "y": 40, "width": 10, "height": 10, "icon": true }
+		"📄": { "x": 244, "y": 40, "width": 10, "height": 10, "icon": true },
+
+		"ℹ": { "x": 224, "y": 60, "width":  10, "height": 10, "icon": true },
+		"❔": { "x": 234, "y": 60, "width": 10, "height": 10, "icon": true },
+		"❕": { "x": 244, "y": 60, "width": 10, "height": 10, "icon": true },
+		"❌": { "x": 224, "y": 70, "width": 10, "height": 10, "icon": true },
+		"💾": { "x": 234, "y": 70, "width": 10, "height": 10, "icon": true },
+		"📇": { "x": 244, "y": 70, "width": 8, "height": 10, "icon": true },
+		"🎮": { "x": 225, "y": 81, "width": 14, "height": 10, "icon": true },
+		"🖱": { "x": 240, "y": 81, "width": 10, "height": 10, "icon": true },
+		"⌨": { "x": 224, "y": 92, "width": 20, "height": 10, "icon": true }
 	}
 }

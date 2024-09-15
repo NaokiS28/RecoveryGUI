@@ -14,46 +14,25 @@
  * BemaniUX. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "vlightgun.hpp"
+#include "notifd.hpp"
 
-namespace vLightgun
+namespace notif
 {
-    Context::Context(post::PostBox *outBox) : _outBox(outBox)
-    {
-        
+
+    void Context::init() {
+
     }
 
-    void Context::update(){
-        for (auto &dev : _devices)
-        {
-            dev->update();
-        }
+    void Context::update() {
+
     }
 
-    void Context::addLightgun()
-    {
-    }
-
-    void Context::removeLightgun()
-    {
-    }
-
-    int Context::init(){
-        int result = 0;
-        for (auto &dev : _devices)
-        {
-            result += dev->init();
-        }
-        return result;
-    }
-
-    int Context::reload(){
-        int result = 0;
-        for (auto &dev : _devices)
-        {
-            result += dev->reload();
-        }
-        return result;
+    void Context::postMessage(PushIcons icon, const char *msg, const char *service){
+        PushMessage push;
+        push.name = service;
+        push.message = msg;
+        push.icon = icon;
+        _messageList.push_back(push);
     }
 
 }

@@ -104,7 +104,7 @@ namespace ui
 	void Context::init()
 	{
 		gpuCtx.init();
-		//ioCtx.init();
+		// ioCtx.init();
 		_ioCtx.init();
 
 		SetTimer(gpuCtx.windowHandle, UI_REFRESH_TIMER, UI_REFRESH_INTERVAL, NULL);
@@ -132,7 +132,6 @@ namespace ui
 
 		auto oldScreen = getInactiveScreen();
 		auto newScreen = getCurrentScreen();
-
 
 		// Background layers (tiled background, time/version)
 		for (auto layer : backgrounds)
@@ -405,61 +404,64 @@ namespace ui
 		ctx.font.draw(
 			ctx.gpuCtx, "Input Debug:", text, ctx.colors[COLOR_TEXT1]);
 		text.y1 = text.y2 + lineHeight;
-		text.y2 = text.y1 + lineHeight;
+		text.y2 = text.y1 + (lineHeight * 2);
 
-		/*
-		int joyStickListLength = ctx.ioCtx.getDeviceCount(vInput::JoystickClass);
+		int joyStickListLength = ctx._ioCtx.getJoystickCount();
 		char textBuffer[32];
 
-		for (int i = 0; i < joyStickListLength; i++)
+		if (!joyStickListLength)
 		{
-			textBuffer[0] = '\0';
-			snprintf(
-				textBuffer, 32, "%s:", ctx.ioCtx.getDeviceName(vInput::JoystickClass, i));
-
 			ctx.font.draw(
-				ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
+				ctx.gpuCtx, "No joysticks registered.", text, ctx.colors[COLOR_TEXT1]);
+		}
+		else
+		{
 
-			text.y1 = text.y2;
-			text.y2 += lineHeight;
-
-			int analogCount = ctx.ioCtx.getRawInputCount(
-				Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_ANALOG, 0));
-			for (int a = 0; a < analogCount; a++)
+			for (int i = 0; i < joyStickListLength; i++)
 			{
 				textBuffer[0] = '\0';
-				int code = Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_DIGITAL, a);
-				int16_t value = ctx.ioCtx.getRawInputInt(code);
 				snprintf(
-					textBuffer, 32, "%d: %s - %x", a + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
-					value);
+					textBuffer, 32, "%s:", ctx._ioCtx.getJoystickName(i));
 
 				ctx.font.draw(
 					ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
 
 				text.y1 = text.y2;
 				text.y2 += lineHeight;
-			}
 
-			int switchCount = ctx.ioCtx.getRawInputCount(
-				Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_DIGITAL, 0));
-			for (int s = 0; s < switchCount; s++)
-			{
-				textBuffer[0] = '\0';
-				int code = Input::getInputCode(vInput::JoystickClass, i, VirtualIO::INPUT_TYPE_DIGITAL, s);
-				bool state = ctx.ioCtx.getRawInputState(code);
-				snprintf(
-					textBuffer, 32, "%d: %s - %s", s + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
-					(state ? "ON" : "OFF"));
+				int analogCount = ctx._ioCtx.getJoystickAnalogCount(i);
+				for (int a = 0; a < analogCount; a++)
+				{
+					textBuffer[0] = '\0';
+					int16_t value = ctx._ioCtx.getJoystickAnalog(i, a);
+					snprintf(
+						textBuffer, 32, "%d: %s - %x", a + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
+						value);
 
-				ctx.font.draw(
-					ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
+					ctx.font.draw(
+						ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
 
-				text.y1 = text.y2;
-				text.y2 += lineHeight;
+					text.y1 = text.y2;
+					text.y2 += lineHeight;
+				}
+
+				int switchCount = ctx._ioCtx.getJoystickSwitchCount(i);
+				for (int s = 0; s < switchCount; s++)
+				{
+					textBuffer[0] = '\0';
+					bool state = ctx._ioCtx.getJoystickSwitch(i, s);
+					snprintf(
+						textBuffer, 32, "%d: %s - %s", s + 1, "n/a", // ctx.ioCtx.getRawInputName(i),
+						(state ? "ON" : "OFF"));
+
+					ctx.font.draw(
+						ctx.gpuCtx, textBuffer, text, ctx.colors[COLOR_TEXT1]);
+
+					text.y1 = text.y2;
+					text.y2 += lineHeight;
+				}
 			}
 		}
-		*/
 	}
 
 	/* Base screen classes */

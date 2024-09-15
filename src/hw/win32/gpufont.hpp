@@ -61,7 +61,7 @@ public:
 		return get(id);
 	}
 
-	CharacterSize get(util::UTF8CodePoint id) const;
+	CharacterSize get(util::UTF8CodePoint id1, util::UTF8CodePoint id2 = 0) const;
 };
 
 /* Font class */

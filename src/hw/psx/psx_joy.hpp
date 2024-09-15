@@ -73,22 +73,22 @@ namespace PSX {
     };
 }
 
-class PSXJoy : public JoystickHandler, public MouseHandler //, public LightgunHandler
+class PSXJoy : public JoystickHandler, public MouseHandler, public LightgunHandler
 {
-private:
-
 public:
     int init() override { return 0; }
     void update() override {}
     int reload() override {}
 
+    const char *getDriverName() override { return "PlayStation"; }
     const char *getDeviceName(int idx) override {}
     int getDeviceCount() override { return 0; }
 
     // Joypads
     bool getSwitch(uint32_t code) override {}
-    int getAnalog(uint32_t code) override {}
-    int getRelative(uint32_t code) override { return 0; }
+    uint32_t getDigital(uint32_t code) override {}
+    int16_t getAnalog(uint32_t code) override {}
+    int16_t getRelative(uint32_t code) override { return 0; }
 
     int getSwitchCount(uint32_t code) override { return 0; }
     int getAnalogCount(uint32_t code) override { return 0; }
@@ -99,6 +99,9 @@ public:
 
     // Keyboard
     int getKeyboardType(int idx){ return Keyboard::AlphaNumeric; }
+
+    // Lightgun
+    int getLightgunType(int idx){ return Lightgun::RasterScan; }
 };
 
 REGISTER_DEVICE_HANDLER(PSXJoy)

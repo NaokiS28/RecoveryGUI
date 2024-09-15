@@ -88,8 +88,8 @@ public:
     int getDeviceCount() { return ioCount; }
 
     bool getSwitch(uint32_t code) { return false; }
-    int getAnalog(uint32_t code) { return 0; }
-    int getRelative(uint32_t code) { return 0; }
+    int16_t getAnalog(uint32_t code) { return 0; }
+    int16_t getRelative(uint32_t code) { return 0; }
 
     // Keyboard
     int getKeyboardType(){ return Keyboard::Numeric; }  // Should be dynamic

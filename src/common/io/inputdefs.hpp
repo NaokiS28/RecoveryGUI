@@ -29,20 +29,23 @@ namespace Input
         IM_NONE,
         IM_DEVICE_CONNECT,
         IM_DEVICE_DISCONNECT,
-        IM_INPUT
+        IM_INPUT,
+        IM_INPUT_DIGITAL,
+        IM_INPUT_ANALOG,
+        IM_INPUT_RELATIVE,
+        IM_MOUSE,
+        IM_MOUSE_DIGITAL,
+        IM_MOUSE_AXIS,
+        IM_LIGHTGUN
     };
 
     // Input name: Get the encoded input name for IO functions. ID is the device hash if src is ABSOLUTE
-    inline constexpr uint32_t getInputCode(uint8_t src, uint8_t subclass, uint8_t id, uint8_t inputType, uint8_t inputIdx)
+    inline constexpr uint32_t getInputCode(uint8_t id, uint8_t inputType, uint8_t inputIdx)
     {
-        return (0 | ((src & 0x0F) << 28) | ((subclass & 0x0F) << 24) | (id << 16) | (inputType << 8) | (inputIdx << 0));
-    }
-    inline constexpr uint32_t getInputCode(uint8_t src, uint8_t id, uint8_t inputType, uint8_t inputIdx)
-    {
-        return (0 | ((src & 0x0F)  << 28) | (id << 16) | (inputType << 8) | (inputIdx << 0));
+        return (0 | (id << 16) | (inputType << 8) | (inputIdx << 0));
     }
     inline constexpr uint32_t getInputCode(uint8_t inputType, uint8_t inputIdx){
-        return getInputCode(0, 0, inputType, inputIdx);
+        return getInputCode(0, inputType, inputIdx);
     }
     
     inline constexpr uint8_t getInputSrcSubClass(uint32_t code) { return ((code & 0x0F000000) >> 24); }
@@ -128,6 +131,13 @@ namespace Input
     {
         "PLAYER%d_SPINNER_%d"
     };
+
+    typedef enum {
+        None,
+        Digital,
+        Analog,
+        Relative
+    } InputType;
 
     enum PlayerNumbers
     {
@@ -299,6 +309,14 @@ namespace Keyboard {
 }
 
 namespace Lightgun {
+    typedef enum {
+        None,
+        XY,
+        RasterScan,
+        LightSensor,
+        Touchscreen
+    } LightgunType;
+
     struct LightgunState {
         int16_t x = 0;
         int16_t y = 0;
